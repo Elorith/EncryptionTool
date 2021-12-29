@@ -26,6 +26,19 @@ public class DoDEraser : IEraser
     
     private void EraseSensitive(string path)
     {
+        using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096))
+        {
+            this.Pass(stream, false, 0x00);
+            this.Pass(stream, false, 0xFF);
+            this.Pass(stream, true);
+            
+            this.Pass(stream, true);
+            
+            this.Pass(stream, false, 0x00);
+            this.Pass(stream, false, 0xFF);
+            this.Pass(stream, true);
+        }
+        File.Delete(path);
     }
 
     private void Pass(FileStream stream, bool useRandomValue, byte? valueToWrite = null)
