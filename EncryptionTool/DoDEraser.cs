@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 public class DoDEraser : IEraser
@@ -6,8 +7,7 @@ public class DoDEraser : IEraser
     private const long defaultBufferSize = 65536;
     private byte[] buffer = new byte[DoDEraser.defaultBufferSize];
     private long currentBufferSize = DoDEraser.defaultBufferSize;
-    private long[] previousBufferSizes = new long[4];
-    
+
     public void Erase(string path)
     {
         this.Erase(path, DoDAlgorithmType.DoDSensitive);
@@ -71,28 +71,26 @@ public class DoDEraser : IEraser
         {
             return;
         }
-        
+
         this.buffer = new byte[bytes];
         this.currentBufferSize = bytes;
-        
-        
     }
 
-    private void Pass(Stream stream, bool useRandomValue, byte? valueToWrite = null)
+    private void Pass(Stream stream, bool usePseudoRandom, byte? valueToWrite = null)
     {
         stream.Position = 0;
         
         long bytes = stream.Length;
         this.CheckMalloc(bytes);
 
-        if (!useRandomValue && valueToWrite.HasValue)
+        if (!usePseudoRandom && valueToWrite.HasValue)
         {
             for (int index = 0; index < bytes; index++)
             {
                 this.buffer[index] = valueToWrite.Value;
             }
         }
-        else if (useRandomValue && !valueToWrite.HasValue)
+        else if (usePseudoRandom && !valueToWrite.HasValue)
         {
             Random random = new Random();
             for (int index = 0; index < bytes; index++)
@@ -102,7 +100,7 @@ public class DoDEraser : IEraser
         }
         else
         {
-            throw new ArgumentException("useRandomValue boolean should not be true while valueToWrite is null or vice versa");
+            throw new ArgumentException("usePseudoRandom boolean should not be true while valueToWrite is null or vice versa");
         }
 
         stream.Write(this.buffer, 0, this.buffer.Length);
