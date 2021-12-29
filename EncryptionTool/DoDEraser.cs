@@ -3,6 +3,11 @@ using System.IO;
 
 public class DoDEraser : IEraser
 {
+    private const long defaultBufferSize = 65536;
+    private byte[] buffer = new byte[DoDEraser.defaultBufferSize];
+    private long currentBufferSize = DoDEraser.defaultBufferSize;
+    private long[] previousBufferSizes = new long[4];
+    
     public void Erase(string path)
     {
         this.Erase(path, DoDAlgorithmType.DoDSensitive);
@@ -60,18 +65,31 @@ public class DoDEraser : IEraser
         }
     }
 
-    private void Pass(FileStream stream, bool useRandomValue, byte? valueToWrite = null)
+    private void CheckMalloc(long bytes)
+    {
+        if (this.currentBufferSize >= bytes)
+        {
+            return;
+        }
+        
+        this.buffer = new byte[bytes];
+        this.currentBufferSize = bytes;
+        
+        
+    }
+
+    private void Pass(Stream stream, bool useRandomValue, byte? valueToWrite = null)
     {
         stream.Position = 0;
         
         long bytes = stream.Length;
-        byte[] buffer = new byte[bytes];
+        this.CheckMalloc(bytes);
 
         if (!useRandomValue && valueToWrite.HasValue)
         {
             for (int index = 0; index < bytes; index++)
             {
-                buffer[index] = valueToWrite.Value;
+                this.buffer[index] = valueToWrite.Value;
             }
         }
         else if (useRandomValue && !valueToWrite.HasValue)
@@ -79,7 +97,7 @@ public class DoDEraser : IEraser
             Random random = new Random();
             for (int index = 0; index < bytes; index++)
             {
-                buffer[index] = (byte)(random.Next() % 256);;
+                this.buffer[index] = (byte)(random.Next() % 256);;
             }
         }
         else
@@ -87,7 +105,7 @@ public class DoDEraser : IEraser
             throw new ArgumentException("useRandomValue boolean should not be true while valueToWrite is null or vice versa");
         }
 
-        stream.Write(buffer, 0, buffer.Length);
+        stream.Write(this.buffer, 0, this.buffer.Length);
         stream.Flush();
     }
 }
