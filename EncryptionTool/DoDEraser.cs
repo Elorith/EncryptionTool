@@ -1,11 +1,7 @@
 using System;
 using System.IO;
 
-/// <summary>
-/// Implements the US DoD 5220.22-M (E) data sanitisation algorithm. Overwrites files 3 times. This method offers "medium" security. Use it only for
-/// files that do not contain highly sensitive information.
-/// </summary>
-public class DoDShortEraser : IEraser
+public class DoDEraser : IEraser
 {
     public void Erase(string path)
     {
@@ -13,6 +9,12 @@ public class DoDShortEraser : IEraser
         {
             throw new FileNotFoundException("Path does not exist");
         }
+        
+        this.EraseFast(path);
+    }
+    
+    private void EraseFast(string path)
+    {
         using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096))
         {
             this.Pass(stream, false, 0x00);
@@ -20,6 +22,10 @@ public class DoDShortEraser : IEraser
             this.Pass(stream, true);
         }
         File.Delete(path);
+    }
+    
+    private void EraseSensitive(string path)
+    {
     }
 
     private void Pass(FileStream stream, bool useRandomValue, byte? valueToWrite = null)

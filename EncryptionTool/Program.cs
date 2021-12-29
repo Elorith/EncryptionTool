@@ -7,7 +7,7 @@ public static class Program
         string path = Console.ReadLine();
         Logger.Singleton.WriteLine("Starting secure erase of file at: '" + path + "'");
 
-        IEraser eraser = new DoDShortEraser();
+        IEraser eraser = new DoDEraser();
         eraser.Erase(path);
         
         Logger.Singleton.WriteLine("Secure erase complete");

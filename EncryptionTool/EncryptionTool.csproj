@@ -39,8 +39,8 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="DoDLongEraser.cs" />
-        <Compile Include="DoDShortEraser.cs" />
+        <Compile Include="DoDAlgorithmType.cs" />
+        <Compile Include="DoDEraser.cs" />
         <Compile Include="IEraser.cs" />
         <Compile Include="Logger.cs" />
         <Compile Include="Program.cs" />
