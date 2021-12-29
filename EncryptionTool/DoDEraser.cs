@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 public class DoDEraser : IEraser
@@ -65,6 +66,7 @@ public class DoDEraser : IEraser
         }
     }
 
+    [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
     private void CheckMalloc(long bytes)
     {
         if (this.currentBufferSize >= bytes)

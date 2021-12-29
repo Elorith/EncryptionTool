@@ -8,7 +8,7 @@ public static class Program
         while (true)
         {
             string path = Console.ReadLine();
-            Program.DoErasePathRecursive(path, DoDAlgorithmType.DoDFast, true);
+            Program.DoErasePathRecursive(path, DoDAlgorithmType.DoDSensitive, true);
         }
     }
 
