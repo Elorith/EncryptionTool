@@ -16,7 +16,7 @@ public class Logger
         this.AppendTimestamp();
         this.AppendSeparator();
         this.AppendMessage(message);
-        this.AppendCarriageReturn();
+        this.AppendCarriageReturn(); 
         string text = this.builder.ToString();
         Console.Write(text);
     }
