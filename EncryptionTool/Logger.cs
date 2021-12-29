@@ -32,6 +32,11 @@ public class Logger
         this.builder.Append("-> ");
     }
 
+    private void AppendMessage(string message)
+    {
+        this.builder.Append(message);
+    }
+
     private void AppendCarriageReturn()
     {
         this.builder.Append('\n');
