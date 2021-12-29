@@ -9,5 +9,22 @@ public class DoDShortEraser : IEraser
 {
     public void Erase(string path)
     {
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Path does not exist");
+        }
+        using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
+        {
+        }
+    }
+
+    private void Pass(FileStream stream, byte value)
+    {
+        long bytes = stream.Length;
+        for (int index = 0; index < bytes; index++)
+        {
+            stream.WriteByte(value);
+        }
+        stream.Flush();
     }
 }
