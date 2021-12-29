@@ -13,13 +13,26 @@ public class DoDEraser : IEraser
     
     public void Erase(string path, int type)
     {
+        this.Erase(path, (DoDAlgorithmType) type);
+    }
+    
+    private void CheckPathExists(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Path does not exist");
+        }
+    }
+
+    private void Erase(string path, DoDAlgorithmType type)
+    {
         this.CheckPathExists(path);
 
-        if ((DoDAlgorithmType)type == DoDAlgorithmType.DoDFast)
+        if (type == DoDAlgorithmType.DoDFast)
         {
             this.EraseFast(path);
         }
-        else if ((DoDAlgorithmType)type == DoDAlgorithmType.DoDSensitive)
+        else if (type == DoDAlgorithmType.DoDSensitive)
         {
             this.EraseSensitive(path);
         }
@@ -29,14 +42,6 @@ public class DoDEraser : IEraser
         }
     }
 
-    private void CheckPathExists(string path)
-    {
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("Path does not exist");
-        }
-    }
-    
     private void EraseFast(string path)
     {
         using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096))
@@ -55,9 +60,9 @@ public class DoDEraser : IEraser
             this.Pass(stream, false, 0x00);
             this.Pass(stream, false, 0xFF);
             this.Pass(stream, true);
-            
+
             this.Pass(stream, true);
-            
+
             this.Pass(stream, false, 0x00);
             this.Pass(stream, false, 0xFF);
             this.Pass(stream, true);
@@ -94,5 +99,7 @@ public class DoDEraser : IEraser
 
         stream.Write(buffer, 0, buffer.Length);
         stream.Flush();
+        
+        Logger.Singleton.WriteLine("Pass completed");
     }
 }
