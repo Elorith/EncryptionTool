@@ -13,4 +13,16 @@ public class Logger
     public void WriteLine()
     {
     }
+
+    private void AppendTimestamp()
+    {
+        DateTime now = DateTime.Now;
+        this.builder.Append(now.Year).Append('-');
+        this.builder.Append(now.Month).Append('-');
+        this.builder.Append(now.Day).Append(' ');
+        this.builder.Append(now.Day).Append(':');
+        this.builder.Append(now.Day).Append(':');
+        this.builder.Append(now.Day).Append('.');
+        this.builder.Append(now.Millisecond);
+    }
 }
