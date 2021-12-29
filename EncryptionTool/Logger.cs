@@ -10,8 +10,12 @@ public class Logger
     
     public static Logger Singleton => Logger.singleton ?? (Logger.singleton = new Logger());
 
-    public void WriteLine()
+    public void WriteLine(string message)
     {
+        this.AppendTimestamp();
+        this.AppendSeparator();
+        this.AppendMessage(message);
+        this.AppendCarriageReturn();
     }
 
     private void AppendTimestamp()
