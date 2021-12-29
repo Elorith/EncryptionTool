@@ -25,4 +25,9 @@ public class Logger
         this.builder.Append(now.Day).Append('.');
         this.builder.Append(now.Millisecond);
     }
+
+    private void AppendCarriageReturn()
+    {
+        this.builder.Append('\n');
+    }
 }
