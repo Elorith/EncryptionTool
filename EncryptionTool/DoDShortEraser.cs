@@ -19,6 +19,7 @@ public class DoDShortEraser : IEraser
             this.Pass(stream, false, 0xFF);
             this.Pass(stream, true);
         }
+        File.Delete(path);
     }
 
     private void Pass(FileStream stream, bool useRandomValue, byte? valueToWrite = null)

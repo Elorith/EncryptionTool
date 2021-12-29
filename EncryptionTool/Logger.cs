@@ -12,10 +12,13 @@ public class Logger
 
     public void WriteLine(string message)
     {
+        this.builder.Clear();
         this.AppendTimestamp();
         this.AppendSeparator();
         this.AppendMessage(message);
         this.AppendCarriageReturn();
+        string text = this.builder.ToString();
+        Console.Write(text);
     }
 
     private void AppendTimestamp()
@@ -24,9 +27,9 @@ public class Logger
         this.builder.Append(now.Year).Append('-');
         this.builder.Append(now.Month).Append('-');
         this.builder.Append(now.Day).Append(' ');
-        this.builder.Append(now.Day).Append(':');
-        this.builder.Append(now.Day).Append(':');
-        this.builder.Append(now.Day).Append('.');
+        this.builder.Append(now.Hour).Append(':');
+        this.builder.Append(now.Minute).Append(':');
+        this.builder.Append(now.Second).Append('.');
         this.builder.Append(now.Millisecond);
     }
     
