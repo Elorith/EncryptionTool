@@ -45,7 +45,7 @@ public class DoDShortEraser : IEraser
         }
         else
         {
-            throw new FileNotFoundException("useRandomValue boolean should not be true while valueToWrite is null or vice versa");
+            throw new ArgumentException("useRandomValue boolean should not be true while valueToWrite is null or vice versa");
         }
 
         stream.Write(buffer, 0, buffer.Length);
