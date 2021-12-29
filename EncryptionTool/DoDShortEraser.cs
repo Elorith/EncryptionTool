@@ -15,16 +15,36 @@ public class DoDShortEraser : IEraser
         }
         using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
         {
+            this.Pass(stream, false,0x00);
+            this.Pass(stream, false, 0x00);
+            
         }
     }
 
-    private void Pass(FileStream stream, byte value)
+    private void Pass(FileStream stream, bool useRandomValue, byte value)
     {
+        stream.Position = 0;
+        
         long bytes = stream.Length;
-        for (int index = 0; index < bytes; index++)
+        byte[] buffer = new byte[bytes];
+
+        if (useRandomValue)
         {
-            stream.WriteByte(value);
+            for (int index = 0; index < bytes; index++)
+            {
+                buffer[index] = value;
+            }
         }
+        else
+        {
+            Random random = new Random();
+            for (int index = 0; index < bytes; index++)
+            {
+                buffer[index] = (byte)(random.Next() % 256);;
+            }
+        }
+
+        stream.Write(buffer, 0, buffer.Length);
         stream.Flush();
     }
 }
