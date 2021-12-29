@@ -8,7 +8,7 @@ public static class Program
         Logger.Singleton.WriteLine("Starting secure erase of file at: '" + path + "'");
 
         IEraser eraser = new DoDEraser();
-        eraser.Erase(path);
+        eraser.Erase(path, (int)DoDAlgorithmType.DoDSensitive);
         
         Logger.Singleton.WriteLine("Secure erase complete");
     }
