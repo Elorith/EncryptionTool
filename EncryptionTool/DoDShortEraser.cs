@@ -13,7 +13,7 @@ public class DoDShortEraser : IEraser
         {
             throw new FileNotFoundException("Path does not exist");
         }
-        using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
+        using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096))
         {
             this.Pass(stream, false, 0x00);
             this.Pass(stream, false, 0xFF);
