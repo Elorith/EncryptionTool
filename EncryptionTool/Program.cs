@@ -39,7 +39,7 @@ public static class Program
         else
         {
             DoDEraser eraser = new DoDEraser();
-            eraser.Erase(path, DoDAlgorithmType.DoDSensitive);
+            eraser.Erase(path, type);
             File.Delete(path);
         }
 

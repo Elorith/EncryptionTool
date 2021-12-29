@@ -5,10 +5,7 @@ public class DoDEraser : IEraser
 {
     public void Erase(string path)
     {
-        this.CheckPathExists(path);
-        
-        // If no algorithm to use is specified, use most secure by default.
-        this.EraseSensitive(path);
+        this.Erase(path, DoDAlgorithmType.DoDSensitive);
     }
     
     public void Erase(string path, int type)
@@ -18,7 +15,10 @@ public class DoDEraser : IEraser
 
     public void Erase(string path, DoDAlgorithmType type)
     {
-        this.CheckPathExists(path);
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Path does not exist");
+        }
 
         if (type == DoDAlgorithmType.DoDFast)
         {
@@ -31,14 +31,6 @@ public class DoDEraser : IEraser
         else
         {
             throw new ArgumentException("Specified algorithm does not exist");
-        }
-    }
-    
-    private void CheckPathExists(string path)
-    {
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("Path does not exist");
         }
     }
 
@@ -97,7 +89,5 @@ public class DoDEraser : IEraser
 
         stream.Write(buffer, 0, buffer.Length);
         stream.Flush();
-        
-        // Logger.Singleton.WriteLine("Pass completed");
     }
 }
