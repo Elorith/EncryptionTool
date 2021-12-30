@@ -11,7 +11,7 @@ public static class Program
             Program.DoErasePathRecursive(path, DoDAlgorithmType.DoDSensitive, true);
         }
     }
-
+    
     private static void DoErasePathRecursive(string path, DoDAlgorithmType type, bool askForConfirmation = true)
     {
         Logger.Singleton.WriteLine("Starting secure erase of '" + path + "'");
@@ -38,7 +38,7 @@ public static class Program
         }
         else
         {
-            DoDEraser eraser = new DoDEraser();
+            DoDSecureEraser eraser = new DoDSecureEraser();
             eraser.Erase(path, type);
             File.Delete(path);
         }

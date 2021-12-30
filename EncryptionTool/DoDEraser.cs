@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-public class DoDEraser : IEraser
+public class DoDSecureEraser : ISecureEraser
 {
     private const long defaultBufferSize = 65536;
-    private byte[] buffer = new byte[DoDEraser.defaultBufferSize];
-    private long currentBufferSize = DoDEraser.defaultBufferSize;
+    private byte[] buffer = new byte[DoDSecureEraser.defaultBufferSize];
+    private long currentBufferSize = DoDSecureEraser.defaultBufferSize;
 
     public void Erase(string path)
     {
@@ -65,8 +65,7 @@ public class DoDEraser : IEraser
             this.Pass(stream, true);
         }
     }
-
-    [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
+    
     private void CheckMalloc(long bytes)
     {
         if (this.currentBufferSize >= bytes)

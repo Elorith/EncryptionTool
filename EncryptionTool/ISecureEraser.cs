@@ -1,4 +1,4 @@
-public interface IEraser
+public interface ISecureEraser
 {
     void Erase(string path);
     
