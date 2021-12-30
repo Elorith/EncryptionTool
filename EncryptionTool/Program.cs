@@ -17,11 +17,11 @@ public class Program
         while (true)
         {
             string path = Console.ReadLine();
-            application.DoErase(path, SanitisationAlgorithmType.DoDSensitive, true);
+            application.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
         }
     }
 
-    public void DoErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
+    public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
     {
         if (askForConfirmation)
         {
