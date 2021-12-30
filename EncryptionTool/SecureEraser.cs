@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 public class SecureEraser
@@ -62,6 +63,7 @@ public class SecureEraser
         this.EraseFast(stream);
     }
 
+    [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
     private void Pass(Stream stream, bool usePseudoRandom, byte? valueToWrite = null)
     {
         stream.Position = 0;
