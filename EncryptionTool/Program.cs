@@ -17,7 +17,7 @@ public class Program
         while (true)
         {
             string path = Console.ReadLine();
-            application.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
+            application.DoSecureErase(path, SanitisationAlgorithmType.DoDFast, true);
         }
     }
 
