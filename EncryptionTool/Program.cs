@@ -32,6 +32,6 @@ public static class Program
         }
 
         SecureEraser eraser = new SecureEraser();
-        eraser.ErasePath();
+        eraser.ErasePath(path, type);
     }
 } 
