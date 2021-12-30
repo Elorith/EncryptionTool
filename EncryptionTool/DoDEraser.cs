@@ -65,46 +65,4 @@ public class DoDSecureEraser : ISecureEraser
             this.Pass(stream, true);
         }
     }
-    
-    private void CheckMalloc(long bytes)
-    {
-        if (this.currentBufferSize >= bytes)
-        {
-            return;
-        }
-
-        this.buffer = new byte[bytes];
-        this.currentBufferSize = bytes;
-    }
-
-    private void Pass(Stream stream, bool usePseudoRandom, byte? valueToWrite = null)
-    {
-        stream.Position = 0;
-        
-        long bytes = stream.Length;
-        this.CheckMalloc(bytes);
-
-        if (!usePseudoRandom && valueToWrite.HasValue)
-        {
-            for (int index = 0; index < bytes; index++)
-            {
-                this.buffer[index] = valueToWrite.Value;
-            }
-        }
-        else if (usePseudoRandom && !valueToWrite.HasValue)
-        {
-            Random random = new Random();
-            for (int index = 0; index < bytes; index++)
-            {
-                this.buffer[index] = (byte)(random.Next() % 256);;
-            }
-        }
-        else
-        {
-            throw new ArgumentException("usePseudoRandom boolean should not be true while valueToWrite is null or vice versa");
-        }
-
-        stream.Write(this.buffer, 0, this.buffer.Length);
-        stream.Flush();
-    }
 }

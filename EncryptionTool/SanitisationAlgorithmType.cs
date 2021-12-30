@@ -1,4 +1,4 @@
-public enum DoDAlgorithmType : int
+public enum SanitisationAlgorithmType : int
 {
     /// <summary>
     /// Implements the US DoD 5220.22-M (E) data sanitisation algorithm. Overwrites files 3 times. This method offers "medium" security. Use it only
