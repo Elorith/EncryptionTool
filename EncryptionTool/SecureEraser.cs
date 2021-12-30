@@ -45,7 +45,7 @@ public class SecureEraser
         }
         File.Delete(path);
         
-        Logger.Singleton.WriteLine("Secure erase complete '" + path + "'");
+        Logger.Singleton.WriteLine("Securely erased '" + path + "'");
     }
 
     private void EraseFast(Stream stream)
@@ -72,10 +72,10 @@ public class SecureEraser
         {
             bufferSizeRequired = SecureEraser.minimumBufferSize;
         }
-        if (this.currentBufferSize < bytes)
+        if (this.currentBufferSize < bufferSizeRequired)
         {
-            this.buffer = new byte[bytes];
-            this.currentBufferSize = bytes;
+            this.buffer = new byte[bufferSizeRequired];
+            this.currentBufferSize = bufferSizeRequired;
         }
 
         if (!usePseudoRandom && valueToWrite.HasValue)
@@ -90,7 +90,7 @@ public class SecureEraser
             Random random = new Random();
             for (int index = 0; index < bytes; index++)
             {
-                this.buffer[index] = (byte)(random.Next() % 256);;
+                this.buffer[index] = (byte)(random.Next() % 256);
             }
         }
         else

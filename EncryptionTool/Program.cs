@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-public static class Program
+public class Program
 {
     public static void Main(string[] args)
     {
@@ -11,13 +11,16 @@ public static class Program
          * 3) Verify that the newly written file is valid.
          * 4) Securely erase the original file from disk using implementation of US DoD 5220.22-M (ECE).
          */
+        
+        Program application = new Program();
+        
         while (true)
         {
             string path = Console.ReadLine();
-            Program.DoErase(path, DoDAlgorithmType.DoDSensitive, true);
+            application.DoErase(path, SanitisationAlgorithmType.DoDSensitive, true);
         }
     }
-    
+
     public void DoErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
     {
         if (askForConfirmation)
