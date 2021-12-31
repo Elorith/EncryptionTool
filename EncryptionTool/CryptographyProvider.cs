@@ -3,6 +3,8 @@ using System.Security.Cryptography;
 
 public class CryptographyProvider
 {
+     public const int KeySize = 256;
+     public const int BlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
      
      public void EncryptFileWithPersonalKey(string path, string personalKey)
@@ -40,6 +42,8 @@ public class CryptographyProvider
           
           using (RijndaelManaged aes = new RijndaelManaged())
           {
+               aes.KeySize = CryptographyProvider.KeySize;
+               aes.BlockSize = CryptographyProvider.BlockSize;
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
 
@@ -48,20 +52,22 @@ public class CryptographyProvider
                this.EncryptToStream(input, output, aes.CreateEncryptor());
           }
           
-          output.Write(salt, 0, 32);
-          output.Write(iv, 0, 16);
+          output.Write(salt, 0, CryptographyProvider.KeySize / 8);
+          output.Write(iv, 0, CryptographyProvider.BlockSize / 8);
      }
 
      private void DecryptWithPersonalKey(Stream input, Stream output, string personalKey)
      {
-          byte[] salt = new byte[32];
-          byte[] iv = new byte[16];
+          byte[] salt = new byte[CryptographyProvider.KeySize / 8];
+          byte[] iv = new byte[CryptographyProvider.BlockSize / 8];
           
-          input.Read(salt, 0, 32);
-          input.Read(iv, 0, 16);
+          input.Read(salt, 0, CryptographyProvider.KeySize / 8);
+          input.Read(iv, 0, CryptographyProvider.BlockSize / 8);
 
           using (RijndaelManaged aes = new RijndaelManaged())
           {
+               aes.KeySize = CryptographyProvider.KeySize;
+               aes.BlockSize = CryptographyProvider.BlockSize;
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
                
@@ -76,8 +82,8 @@ public class CryptographyProvider
           byte[] key;
           if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
           {
-               salt = new byte[32];
-               iv = new byte[16];
+               salt = new byte[CryptographyProvider.KeySize / 8];
+               iv = new byte[CryptographyProvider.BlockSize / 8];
                
                using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
                {
@@ -87,7 +93,7 @@ public class CryptographyProvider
           }
           using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(personalKey, salt))
           {
-               key = pbkdf2.GetBytes(32);
+               key = pbkdf2.GetBytes(CryptographyProvider.KeySize / 8);
           }
           return key;
      }
