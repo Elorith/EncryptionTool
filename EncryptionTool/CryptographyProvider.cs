@@ -11,7 +11,7 @@ public class CryptographyProvider
      {
           using (FileStream input = new FileStream(path, FileMode.Open))
           {
-               string outputPath = path + ".aes";
+               string outputPath = this.GetPathForEncryptedFile(path);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     this.EncryptWithPersonalKey(input, output, personalKey);
@@ -25,7 +25,7 @@ public class CryptographyProvider
      {
           using (FileStream input = new FileStream(path, FileMode.Open))
           {
-               string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+               string outputPath = this.GetPathForOriginalFile(path);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     this.DecryptWithPersonalKey(input, output, personalKey);
@@ -33,6 +33,16 @@ public class CryptographyProvider
           }
 
           Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
+     }
+
+     private string GetPathForEncryptedFile(string originalPath)
+     {
+          return Path.Combine(originalPath, ".aes");
+     }
+     
+     private string GetPathForOriginalFile(string encryptedPath)
+     {
+          return Path.Combine(Path.GetDirectoryName(encryptedPath), Path.GetFileNameWithoutExtension(encryptedPath));
      }
 
      private void EncryptWithPersonalKey(Stream input, Stream output, string personalKey)
