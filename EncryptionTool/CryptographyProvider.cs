@@ -12,61 +12,69 @@ public class CryptographyProvider
                string outputPath = path + ".aes";
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    using (RijndaelManaged aes = new RijndaelManaged())
-                    {
-                         byte[] salt = null;
-                         byte[] iv = null;
-                    
-                         aes.Padding = PaddingMode.ISO10126;
-                         aes.Mode = CipherMode.CBC;
-                         
-                         aes.Key = this.RecalculateKey(personalKey, ref salt, ref iv);
-                         output.Write(salt, 0, 32);
-                         output.Write(iv, 0, 16);
-                         
-                         aes.IV = iv;
-                         this.EncryptToStream(input, output, aes.CreateEncryptor());
-                    }
+                    this.EncryptWithPersonalKey(input, output, personalKey);
                }
           }
-          
-
           
           Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted.");
      }
 
      public void DecryptFileWithPersonalKey(string path, string personalKey)
      {
+          using (FileStream input = new FileStream(path, FileMode.Open))
+          {
+               string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+               using (FileStream output = new FileStream(outputPath, FileMode.Create))
+               {
+                    this.DecryptWithPersonalKey(input, output, personalKey);
+               }
+          }
+
+          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
+     }
+
+     private void EncryptWithPersonalKey(Stream input, Stream output, string personalKey)
+     {
+          byte[] salt = null;
+          byte[] iv = null;
+          
+          using (RijndaelManaged aes = new RijndaelManaged())
+          {
+               aes.Padding = PaddingMode.ISO10126;
+               aes.Mode = CipherMode.CBC;
+
+               aes.Key = this.CalculateKey(personalKey, ref salt, ref iv);
+               aes.IV = iv;
+               this.EncryptToStream(input, output, aes.CreateEncryptor());
+          }
+          
+          output.Write(salt, 0, 32);
+          output.Write(iv, 0, 16);
+     }
+
+     private void DecryptWithPersonalKey(Stream input, Stream output, string personalKey)
+     {
+          byte[] salt = new byte[32];
+          byte[] iv = new byte[16];
+          
+          input.Read(salt, 0, 32);
+          input.Read(iv, 0, 16);
+
           using (RijndaelManaged aes = new RijndaelManaged())
           {
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
                
-               using (FileStream input = new FileStream(path, FileMode.Open))
-               {
-                    string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
-                    using (FileStream output = new FileStream(outputPath, FileMode.Create))
-                    {
-                         byte[] salt = new byte[32];
-                         byte[] iv = new byte[16];
-                         
-                         input.Read(salt, 0, 32);
-                         input.Read(iv, 0, 16);
-                         aes.Key = this.RecalculateKey(personalKey, ref salt, ref iv);
-                         
-                         aes.IV = iv;
-                         this.DecryptFromStream(input, output, aes.CreateDecryptor());
-                    }
-               }
+               aes.Key = this.CalculateKey(personalKey, ref salt, ref iv);
+               aes.IV = iv;
+               this.DecryptFromStream(input, output, aes.CreateDecryptor());
           }
-          
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
      }
 
-     private byte[] RecalculateKey(string personalKey, ref byte[] salt, ref byte[] iv)
+     private byte[] CalculateKey(string personalKey, ref byte[] salt, ref byte[] iv)
      {
           byte[] key;
-          if (salt == null || iv == null)
+          if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
           {
                salt = new byte[32];
                iv = new byte[16];
