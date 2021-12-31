@@ -14,13 +14,37 @@ public class Program
         
         Program application = new Program();
         
-        while (true)
-        {
-            string path = Console.ReadLine();
-            application.DoSecureErase(path, SanitisationAlgorithmType.DoDFast, true);
-        }
+        string path1 = Console.ReadLine();
+        application.DoEncryption(path1);
+        
+        string path2 = Console.ReadLine();
+        application.DoDecryption(path2);
     }
 
+    public void DoEncryption(string path)
+    {
+        Logger.Singleton.WriteLine("'" + path + "' will be encrypted. Please provide a password to encrypt with.");
+        
+        string response = Console.ReadLine();
+
+        CryptographyProvider cryptography = new CryptographyProvider();
+        cryptography.Encrypt(path, response);
+
+        this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
+    }
+    
+    public void DoDecryption(string path)
+    {
+        Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
+        
+        string response = Console.ReadLine();
+
+        CryptographyProvider cryptography = new CryptographyProvider();
+        cryptography.Decrypt(path, response);
+        
+        File.Delete(path);
+    }
+    
     public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
     {
         if (askForConfirmation)

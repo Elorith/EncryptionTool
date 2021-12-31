@@ -4,17 +4,18 @@ using System.Text;
 
 public class CryptographyProvider
 {
-     private void Encrypt(string path, string password)
+     public void Encrypt(string path, string password)
      {
           using (RijndaelManaged aes = new RijndaelManaged())
           {
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
 
-               using (FileStream output = new FileStream(path + ".aes", FileMode.Create))
+               string outputPath = path + ".aes";
+               using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     byte[] salt = new byte[32];
-                    byte[] iv = new byte[32];
+                    byte[] iv = new byte[16];
 
                     using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
                     {
@@ -22,7 +23,7 @@ public class CryptographyProvider
                          rng.GetBytes(iv);
                     }
                     output.Write(salt, 0, 32);
-                    output.Write(iv, 0, 32);
+                    output.Write(iv, 0, 16);
                     
                     using (Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(password, salt))
                     {
@@ -44,9 +45,11 @@ public class CryptographyProvider
                     }
                }
           }
+          
+          Logger.Singleton.WriteLine("'" + path + " has been successfully encrypted.");
      }
 
-     private void Decrypt(string path, string password)
+     public void Decrypt(string path, string password)
      {
           using (RijndaelManaged aes = new RijndaelManaged())
           {
@@ -56,10 +59,10 @@ public class CryptographyProvider
                using (FileStream input = new FileStream(path, FileMode.Open))
                {
                     byte[] salt = new byte[32];
-                    byte[] iv = new byte[32];
+                    byte[] iv = new byte[16];
 
                     input.Read(salt, 0, 32);
-                    input.Read(iv, 0, 32);
+                    input.Read(iv, 0, 16);
                     
                     using (Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(password, salt))
                     {
@@ -69,7 +72,8 @@ public class CryptographyProvider
 
                     using (CryptoStream stream = new CryptoStream(input, aes.CreateDecryptor(), CryptoStreamMode.Read))
                     {
-                         using (FileStream output = new FileStream(Path.GetFileNameWithoutExtension(path), FileMode.Create))
+                         string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+                         using (FileStream output = new FileStream(outputPath, FileMode.Create))
                          {
                               byte[] buffer = new byte[1048576];
                               int bytesRead;
@@ -81,5 +85,7 @@ public class CryptographyProvider
                     }
                }
           }
+          
+          Logger.Singleton.WriteLine("'" + path + " has been successfully decrypted.");
      }
 }
