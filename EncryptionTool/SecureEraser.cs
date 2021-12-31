@@ -27,7 +27,7 @@ public class SecureEraser
 
     public void EraseFile(string path, SanitisationAlgorithmType type)
     {
-        Logger.Singleton.WriteLine("Starting secure erase of file at'" + path + "'");
+        Logger.Singleton.WriteLine("Starting secure erase of file at '" + path + "'");
         
         using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096))
         {

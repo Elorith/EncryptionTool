@@ -6,7 +6,7 @@ public class Program
     public static void Main(string[] args)
     {
         /*
-         * 1) Take file and encrypt using the user's personal key (which needs to be entered each time a security related action is taken).
+         * 1) Take original file and encrypt using the user's personal key (which needs to be entered each time a security related action is taken).
          * 2) Write encrypted variation of the file to disk.
          * 3) Verify that the newly written file is valid.
          * 4) Securely erase the original file from disk using implementation of US DoD 5220.22-M (ECE).
