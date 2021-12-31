@@ -49,11 +49,12 @@ public class CryptographyProvider
 
                aes.Key = this.CalculateKey(personalKey, ref salt, ref iv);
                aes.IV = iv;
+               
+               output.Write(salt, 0, CryptographyProvider.KeySize / 8);
+               output.Write(iv, 0, CryptographyProvider.BlockSize / 8);
+               
                this.EncryptToStream(input, output, aes.CreateEncryptor());
           }
-          
-          output.Write(salt, 0, CryptographyProvider.KeySize / 8);
-          output.Write(iv, 0, CryptographyProvider.BlockSize / 8);
      }
 
      private void DecryptWithPersonalKey(Stream input, Stream output, string personalKey)
@@ -73,6 +74,7 @@ public class CryptographyProvider
                
                aes.Key = this.CalculateKey(personalKey, ref salt, ref iv);
                aes.IV = iv;
+               
                this.DecryptFromStream(input, output, aes.CreateDecryptor());
           }
      }
