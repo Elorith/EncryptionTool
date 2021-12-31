@@ -39,7 +39,7 @@ public class CryptographyProvider
                }
           }
           
-          Logger.Singleton.WriteLine("'" + path + " has been successfully encrypted.");
+          Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted.");
      }
 
      public void Decrypt(string path, string password)
@@ -71,7 +71,7 @@ public class CryptographyProvider
                }
           }
           
-          Logger.Singleton.WriteLine("'" + path + " has been successfully decrypted.");
+          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
      }
 
      private void Encrypt(Stream input, Stream output, ICryptoTransform encryptor)
@@ -84,6 +84,8 @@ public class CryptographyProvider
                {
                     stream.Write(buffer, 0, bytesRead);
                }
+               
+               stream.FlushFinalBlock();
           }
      }
 
