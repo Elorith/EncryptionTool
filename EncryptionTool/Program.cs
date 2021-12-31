@@ -16,6 +16,7 @@ public class Program
         
         string path1 = Console.ReadLine();
         application.DoEncryption(path1);
+        application.DoSecureErase(path1, SanitisationAlgorithmType.DoDSensitive, false);
         
         string path2 = Console.ReadLine();
         application.DoDecryption(path2);
@@ -29,8 +30,6 @@ public class Program
 
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.Encrypt(path, response);
-
-        this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
     }
     
     public void DoDecryption(string path)
@@ -41,8 +40,6 @@ public class Program
 
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.Decrypt(path, response);
-        
-        File.Delete(path);
     }
     
     public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)

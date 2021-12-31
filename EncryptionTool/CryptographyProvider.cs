@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -76,11 +77,18 @@ public class CryptographyProvider
                          using (FileStream output = new FileStream(outputPath, FileMode.Create))
                          {
                               byte[] buffer = new byte[1048576];
-                              int bytesRead;
-                              while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                              try
                               {
-                                   output.Write(buffer, 0, bytesRead);
-                              }   
+                                   int bytesRead;
+                                   while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                                   {
+                                        output.Write(buffer, 0, bytesRead);
+                                   }   
+                              }
+                              catch (CryptographicException ex)
+                              {
+                                   Logger.Singleton.WriteLine("'" + path + " could not be decrypted.");
+                              }
                          }    
                     }
                }
