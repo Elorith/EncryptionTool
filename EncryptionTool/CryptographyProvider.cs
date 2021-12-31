@@ -5,44 +5,37 @@ public class CryptographyProvider
 {
      private const ulong encryptionBufferSize = 1048576;
      
-     public void Encrypt(string path, string password)
+     public void EncryptFileWithPersonalKey(string path, string personalKey)
      {
-          using (RijndaelManaged aes = new RijndaelManaged())
+          using (FileStream input = new FileStream(path, FileMode.Open))
           {
-               aes.Padding = PaddingMode.ISO10126;
-               aes.Mode = CipherMode.CBC;
-
-               using (FileStream input = new FileStream(path, FileMode.Open))
+               string outputPath = path + ".aes";
+               using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    string outputPath = path + ".aes";
-                    using (FileStream output = new FileStream(outputPath, FileMode.Create))
+                    using (RijndaelManaged aes = new RijndaelManaged())
                     {
-                         byte[] salt = new byte[32];
-                         byte[] iv = new byte[16];
-
-                         using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-                         {
-                              rng.GetBytes(salt);
-                              rng.GetBytes(iv);
-                         }
+                         byte[] salt = null;
+                         byte[] iv = null;
+                    
+                         aes.Padding = PaddingMode.ISO10126;
+                         aes.Mode = CipherMode.CBC;
+                         
+                         aes.Key = this.RecalculateKey(personalKey, ref salt, ref iv);
                          output.Write(salt, 0, 32);
                          output.Write(iv, 0, 16);
-                    
-                         using (Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(password, salt))
-                         {
-                              aes.Key = key.GetBytes(32);
-                              aes.IV = iv;
-                         }
                          
-                         this.Encrypt(input, output, aes.CreateEncryptor());
+                         aes.IV = iv;
+                         this.EncryptToStream(input, output, aes.CreateEncryptor());
                     }
                }
           }
           
+
+          
           Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted.");
      }
 
-     public void Decrypt(string path, string password)
+     public void DecryptFileWithPersonalKey(string path, string personalKey)
      {
           using (RijndaelManaged aes = new RijndaelManaged())
           {
@@ -56,17 +49,13 @@ public class CryptographyProvider
                     {
                          byte[] salt = new byte[32];
                          byte[] iv = new byte[16];
-
+                         
                          input.Read(salt, 0, 32);
                          input.Read(iv, 0, 16);
-                    
-                         using (Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(password, salt))
-                         {
-                              aes.Key = key.GetBytes(32);
-                              aes.IV = iv;
-                         }
+                         aes.Key = this.RecalculateKey(personalKey, ref salt, ref iv);
                          
-                         this.Decrypt(input, output, aes.CreateDecryptor());
+                         aes.IV = iv;
+                         this.DecryptFromStream(input, output, aes.CreateDecryptor());
                     }
                }
           }
@@ -74,7 +63,28 @@ public class CryptographyProvider
           Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
      }
 
-     private void Encrypt(Stream input, Stream output, ICryptoTransform encryptor)
+     private byte[] RecalculateKey(string personalKey, ref byte[] salt, ref byte[] iv)
+     {
+          byte[] key;
+          if (salt == null || iv == null)
+          {
+               salt = new byte[32];
+               iv = new byte[16];
+               
+               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+               {
+                    rng.GetBytes(salt);
+                    rng.GetBytes(iv);
+               }
+          }
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(personalKey, salt))
+          {
+               key = pbkdf2.GetBytes(32);
+          }
+          return key;
+     }
+
+     private void EncryptToStream(Stream input, Stream output, ICryptoTransform encryptor)
      {
           using (CryptoStream stream = new CryptoStream(output, encryptor, CryptoStreamMode.Write))
           {
@@ -89,7 +99,7 @@ public class CryptographyProvider
           }
      }
 
-     private void Decrypt(Stream input, Stream output, ICryptoTransform decryptor)
+     private void DecryptFromStream(Stream input, Stream output, ICryptoTransform decryptor)
      {
           using (CryptoStream stream = new CryptoStream(input, decryptor, CryptoStreamMode.Read))
           {

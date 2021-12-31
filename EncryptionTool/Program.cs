@@ -29,7 +29,7 @@ public class Program
         string response = Console.ReadLine();
 
         CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.Encrypt(path, response);
+        cryptography.EncryptFileWithPersonalKey(path, response);
     }
     
     public void DoDecryption(string path)
@@ -39,7 +39,7 @@ public class Program
         string response = Console.ReadLine();
 
         CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.Decrypt(path, response);
+        cryptography.DecryptFileWithPersonalKey(path, response);
     }
     
     public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
