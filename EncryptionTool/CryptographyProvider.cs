@@ -52,6 +52,17 @@ public class CryptographyProvider
           return Encoding.ASCII.GetString(original);
      }
 
+     public string HashFile(string path)
+     {
+          string hash;
+          using (FileStream input = new FileStream(path, FileMode.Open))
+          { 
+               hash = this.HashToString(input);
+          }
+
+          return hash;
+     }
+
      #endregion
 
      #region Internal AES Functions
@@ -187,6 +198,17 @@ public class CryptographyProvider
      #endregion
      
      #region Internal Hashing Functions
+
+     private string HashToString(Stream input)
+     {
+          string hash;
+          using (MemoryStream output = new MemoryStream())
+          {
+               this.HashToStream(input, output);
+               hash = Encoding.ASCII.GetString(output.ToArray());
+          }
+          return hash;
+     }
 
      private void HashToStream(Stream input, Stream output)
      {
