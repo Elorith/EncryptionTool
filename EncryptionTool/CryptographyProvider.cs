@@ -1,5 +1,6 @@
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 
 public class CryptographyProvider
 {
@@ -45,6 +46,55 @@ public class CryptographyProvider
           return Path.Combine(Path.GetDirectoryName(encryptedPath), Path.GetFileNameWithoutExtension(encryptedPath));
      }
 
+     public string EncryptStringWithPersonalKey(string original, string personalKey)
+     {
+          string encrypted;
+          using (MemoryStream input = new MemoryStream(Encoding.UTF8.GetBytes(original)))
+          {
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.EncryptWithPersonalKey(input, output, personalKey);
+                    encrypted = Encoding.ASCII.GetString(output.ToArray());
+               }
+          }
+          return encrypted;
+     }
+
+     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
+     {
+          string original;
+          using (MemoryStream input = new MemoryStream(Encoding.UTF8.GetBytes(encrypted)))
+          {
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.DecryptWithPersonalKey(input, output, personalKey);
+                    original = Encoding.ASCII.GetString(output.ToArray());
+               }
+          }
+          return original;
+     }
+
+     private byte[] CalculateCipherFromPersonalKey(string personalKey, ref byte[] salt, ref byte[] iv)
+     {
+          byte[] cipher;
+          if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
+          {
+               salt = new byte[CryptographyProvider.KeySize / 8];
+               iv = new byte[CryptographyProvider.BlockSize / 8];
+               
+               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+               {
+                    rng.GetBytes(salt);
+                    rng.GetBytes(iv);
+               }
+          }
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(personalKey, salt))
+          {
+               cipher = pbkdf2.GetBytes(CryptographyProvider.KeySize / 8);
+          }
+          return cipher;
+     }
+
      private void EncryptWithPersonalKey(Stream input, Stream output, string personalKey)
      {
           byte[] salt = null;
@@ -57,7 +107,7 @@ public class CryptographyProvider
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
 
-               aes.Key = this.CalculateKey(personalKey, ref salt, ref iv);
+               aes.Key = this.CalculateCipherFromPersonalKey(personalKey, ref salt, ref iv);
                aes.IV = iv;
                
                output.Write(salt, 0, CryptographyProvider.KeySize / 8);
@@ -82,32 +132,11 @@ public class CryptographyProvider
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
                
-               aes.Key = this.CalculateKey(personalKey, ref salt, ref iv);
+               aes.Key = this.CalculateCipherFromPersonalKey(personalKey, ref salt, ref iv);
                aes.IV = iv;
                
                this.DecryptFromStream(input, output, aes.CreateDecryptor());
           }
-     }
-
-     private byte[] CalculateKey(string personalKey, ref byte[] salt, ref byte[] iv)
-     {
-          byte[] key;
-          if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
-          {
-               salt = new byte[CryptographyProvider.KeySize / 8];
-               iv = new byte[CryptographyProvider.BlockSize / 8];
-               
-               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-               {
-                    rng.GetBytes(salt);
-                    rng.GetBytes(iv);
-               }
-          }
-          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(personalKey, salt))
-          {
-               key = pbkdf2.GetBytes(CryptographyProvider.KeySize / 8);
-          }
-          return key;
      }
 
      private void EncryptToStream(Stream input, Stream output, ICryptoTransform encryptor)
