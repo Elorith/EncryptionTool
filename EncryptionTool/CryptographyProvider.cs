@@ -75,7 +75,7 @@ public class CryptographyProvider
           string hash;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           { 
-               hash = this.HashToString(input);
+               hash = this.HashToString(input, false);
           }
 
           return hash;
@@ -196,12 +196,12 @@ public class CryptographyProvider
      
      #region Internal Hashing Functions
 
-     private string HashToString(Stream input)
+     private string HashToString(Stream input, bool useUniqueCipherPermutation)
      {
           string hash;
           using (MemoryStream output = new MemoryStream())
           {
-               this.HashToStream(input, output);
+               this.HashToStream(input, output, useUniqueCipherPermutation);
                byte[] buffer = output.ToArray();
 
                StringBuilder builder = new StringBuilder();
@@ -215,17 +215,20 @@ public class CryptographyProvider
           return hash;
      }
 
-     private void HashToStream(Stream input, Stream output)
+     private void HashToStream(Stream input, Stream output, bool useUniqueCipherPermutation)
      {
-          /*byte[] unique = new byte[16];
-          using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+          byte[] permutation;
+          if (useUniqueCipherPermutation)
           {
-               rng.GetBytes(unique);
+               /*byte[] unique = new byte[16];
+               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+               {
+                    rng.GetBytes(unique);
+               }
+    
+               permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
+               // TODO: Figure out how to implement this.    
           }
-          
-          byte[] permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
-          // TODO: Figure out how to implement this.
-          
           using (SHA256 sha = SHA256.Create())
           {
                byte[] hash = sha.ComputeHash(input);

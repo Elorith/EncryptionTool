@@ -40,7 +40,7 @@ public class SecureEraser
             }
             else
             {
-                throw new ArgumentException("Specified SanitisationAlgorithmType value is invalid");
+                throw new ArgumentException("Specified sanitisation algorithm type is invalid");
             }
         }
         File.Delete(path);

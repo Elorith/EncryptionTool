@@ -3,6 +3,7 @@ using System.IO;
 
 public class Program
 {
+    // Command-line interface implementation of the encryption tool.
     public static void Main(string[] args)
     {
         /*
@@ -15,16 +16,56 @@ public class Program
         
         Program application = new Program();
 
-        string path1 = Console.ReadLine();
-        application.DoEncryption(path1);
-
-        string path2 = Console.ReadLine();
-        application.DoDecryption(path2);
+        bool exitFlag = false;
+        while (!exitFlag)
+        {
+            Logger.Singleton.WriteLine("Perform encryption or decryption? (Encrypt = 1; Decrypt = 2)");
+            ConsoleKeyInfo info = Console.ReadKey();
+            Console.WriteLine();
+            
+            if (info.Key == ConsoleKey.D1)
+            {
+                Logger.Singleton.WriteLine("Please enter the path of the file to encrypt.");
+                try
+                {
+                    application.DoFileEncryption(Console.ReadLine());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton.WriteLine(ex.Message);
+                }
+            }
+            else if (info.Key == ConsoleKey.D2)
+            {
+                Logger.Singleton.WriteLine("Please enter the path of the file to decrypt.");
+                try
+                {
+                    application.DoFileDecryption(Console.ReadLine());
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton.WriteLine(ex.Message);
+                }
+            }
+            
+            Logger.Singleton.WriteLine("Take another action (y/n)?");
+            
+            string response = Console.ReadLine();
+            if (response != "y")
+            {
+                exitFlag = true;
+            }   
+        }
     }
-    
-    public void DoEncryption(string path)
+
+    public void DoFileEncryption(string path)
     {
-        Logger.Singleton.WriteLine("'" + path + "' will be encrypted. Please provide a password to encrypt with.");
+        if (!File.Exists(path))
+        {
+            throw new ArgumentException("Specified path is not a file or does not exist");
+        }
+        
+        Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
         string response = Console.ReadLine();
         
         Logger.Singleton.WriteLine("Please re-enter the password.");
@@ -42,8 +83,13 @@ public class Program
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
     }
     
-    public void DoDecryption(string path)
+    public void DoFileDecryption(string path)
     {
+        if (!File.Exists(path))
+        {
+            throw new ArgumentException("Specified path is not a file or does not exist");
+        }
+        
         Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
         
         string response = Console.ReadLine();
@@ -58,10 +104,10 @@ public class Program
     {
         if (askForConfirmation)
         {
-            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
+            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (y/n)?");
         
             string response = Console.ReadLine();
-            if (response != "Y")
+            if (response != "y")
             {
                 return;
             }   
