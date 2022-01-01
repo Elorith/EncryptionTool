@@ -17,7 +17,7 @@ public class CryptographyProvider
                string outputPath = Path.Combine(path, ".aes");
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    this.EncryptWithPersonalKey(input, output, personalKey);
+                    this.EncryptToStreamWithPersonalKey(input, output, personalKey);
                }
           }
           
@@ -31,7 +31,7 @@ public class CryptographyProvider
                string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    this.DecryptWithPersonalKey(input, output, personalKey);
+                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
                }
           }
 
@@ -40,37 +40,51 @@ public class CryptographyProvider
 
      public string EncryptStringWithPersonalKey(string original, string personalKey)
      {
-          string encrypted;
-          using (MemoryStream input = new MemoryStream(Encoding.UTF8.GetBytes(original)))
-          {
-               using (MemoryStream output = new MemoryStream())
-               {
-                    this.EncryptWithPersonalKey(input, output, personalKey);
-                    encrypted = Encoding.ASCII.GetString(output.ToArray());
-               }
-          }
-          return encrypted;
+          byte[] encrypted = EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
+
+          return Encoding.ASCII.GetString(encrypted);
      }
 
      public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
      {
-          string original;
-          using (MemoryStream input = new MemoryStream(Encoding.UTF8.GetBytes(encrypted)))
-          {
-               using (MemoryStream output = new MemoryStream())
-               {
-                    this.DecryptWithPersonalKey(input, output, personalKey);
-                    original = Encoding.ASCII.GetString(output.ToArray());
-               }
-          }
-          return original;
+          byte[] original = EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(encrypted), personalKey);
+
+          return Encoding.ASCII.GetString(original);
      }
-     
+
      #endregion
 
      #region Internal AES Functions
 
-     private void EncryptWithPersonalKey(Stream input, Stream output, string personalKey)
+     private byte[] EncryptBufferWithPersonalKey(byte[] original, string personalKey)
+     {
+          byte[] encrypted;
+          using (MemoryStream input = new MemoryStream(original))
+          {
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.EncryptToStreamWithPersonalKey(input, output, personalKey);
+                    encrypted = output.ToArray();
+               }
+          }
+          return encrypted;
+     }
+     
+     private byte[] DecryptBufferWithPersonalKey(byte[] encrypted, string personalKey)
+     {
+          byte[] original;
+          using (MemoryStream input = new MemoryStream(encrypted))
+          {
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    original = output.ToArray();
+               }
+          }
+          return original;
+     }
+
+     private void EncryptToStreamWithPersonalKey(Stream input, Stream output, string personalKey)
      {
           byte[] salt = null;
           byte[] iv = null;
@@ -92,7 +106,7 @@ public class CryptographyProvider
           }
      }
 
-     private void DecryptWithPersonalKey(Stream input, Stream output, string personalKey)
+     private void DecryptToStreamWithPersonalKey(Stream input, Stream output, string personalKey)
      {
           byte[] salt = new byte[CryptographyProvider.EncryptionKeySize / 8];
           byte[] iv = new byte[CryptographyProvider.EncryptionBlockSize / 8];
