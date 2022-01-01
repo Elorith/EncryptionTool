@@ -217,13 +217,13 @@ public class CryptographyProvider
 
      private void HashToStream(Stream input, Stream output)
      {
-          byte[] unique = new byte[16];
+          /*byte[] unique = new byte[16];
           using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
           {
                rng.GetBytes(unique);
           }
           
-          byte[] permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));
+          byte[] permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
           // TODO: Figure out how to implement this.
           
           using (SHA256 sha = SHA256.Create())
@@ -237,18 +237,10 @@ public class CryptographyProvider
      
      #region Miscellaneous Internal Functions
 
-     private byte[] RecalculateCipherPermutation(string unique)
-     {
-          byte[] salt = null;
-          byte[] iv = null;
-
-          return this.RecalculateCipherPermutation(unique, ref salt, ref iv);
-     }
-     
      private byte[] RecalculateCipherPermutation(string unique, ref byte[] salt, ref byte[] iv)
      {
           byte[] permutation;
-          if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
+          if (salt == null || iv == null) // If new salt and vector is needed, leave salt and iv buffers null.
           {
                salt = new byte[CryptographyProvider.EncryptionKeySize / 8];
                iv = new byte[CryptographyProvider.EncryptionBlockSize / 8];
@@ -259,7 +251,7 @@ public class CryptographyProvider
                     rng.GetBytes(iv);
                }
           }
-          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(unique, salt, 100000))
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(unique, salt, 10000))
           {
                permutation = pbkdf2.GetBytes(CryptographyProvider.EncryptionKeySize / 8);
           }
