@@ -20,6 +20,7 @@ public class Program
         
         string path2 = Console.ReadLine();
         application.DoDecryption(path2);
+        File.Delete(path2);
     }
     
     public void DoEncryption(string path)
