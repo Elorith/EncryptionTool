@@ -13,7 +13,7 @@ public class Program
          */
         
         Program application = new Program();
-        
+
         string path1 = Console.ReadLine();
         application.DoEncryption(path1);
         application.DoSecureErase(path1, SanitisationAlgorithmType.DoDSensitive, false);
@@ -21,7 +21,7 @@ public class Program
         string path2 = Console.ReadLine();
         application.DoDecryption(path2);
     }
-
+    
     public void DoEncryption(string path)
     {
         Logger.Singleton.WriteLine("'" + path + "' will be encrypted. Please provide a password to encrypt with.");

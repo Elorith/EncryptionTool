@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,11 +13,20 @@ public class CryptographyProvider
      
      public void EncryptFileWithPersonalKey(string path, string personalKey)
      {
-          using (FileStream input = new FileStream(path, FileMode.Open))
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string outputPath = Path.Combine(path, ".aes");
+               string encryptedFileName = this.HashFile(path) + ".aes";
+               string directoryName = Path.GetDirectoryName(path);
+
+               string outputPath = Path.Combine(directoryName, encryptedFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
+                    byte[] originalFileName = this.EncryptStringWithPersonalKey(Path.GetFileName(path), personalKey);
+                    byte[] originalFileNameLength = BitConverter.GetBytes(originalFileName.Length);
+                    
+                    output.Write(originalFileNameLength, 0, 4);
+                    output.Write(originalFileName, 0, originalFileName.Length);
+                    
                     this.EncryptToStreamWithPersonalKey(input, output, personalKey);
                }
           }
@@ -26,9 +36,17 @@ public class CryptographyProvider
 
      public void DecryptFileWithPersonalKey(string path, string personalKey)
      {
-          using (FileStream input = new FileStream(path, FileMode.Open))
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+               byte[] originalFileNameLength = new byte[4];
+               input.Read(originalFileNameLength, 0, 4);
+
+               byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
+               input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+
+               string originalFileName = this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
+               
+               string outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     this.DecryptToStreamWithPersonalKey(input, output, personalKey);
@@ -38,24 +56,24 @@ public class CryptographyProvider
           Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
      }
 
-     public string EncryptStringWithPersonalKey(string original, string personalKey)
+     public byte[] EncryptStringWithPersonalKey(string original, string personalKey)
      {
-          byte[] encrypted = EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
+          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
 
-          return Encoding.ASCII.GetString(encrypted);
+          return encrypted;
      }
 
-     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
+     public string DecryptStringWithPersonalKey(byte[] encrypted, string personalKey)
      {
-          byte[] original = EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(encrypted), personalKey);
+          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
 
-          return Encoding.ASCII.GetString(original);
+          return original;
      }
 
      public string HashFile(string path)
      {
           string hash;
-          using (FileStream input = new FileStream(path, FileMode.Open))
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           { 
                hash = this.HashToString(input);
           }
@@ -205,7 +223,15 @@ public class CryptographyProvider
           using (MemoryStream output = new MemoryStream())
           {
                this.HashToStream(input, output);
-               hash = Encoding.ASCII.GetString(output.ToArray());
+               byte[] buffer = output.ToArray();
+
+               StringBuilder builder = new StringBuilder();
+               for (int index = 0; index < buffer.Length; index++)
+               {
+                    byte value = buffer[index];
+                    builder.Append(value.ToString("x2"));  
+               }
+               hash = builder.ToString();
           }
           return hash;
      }
