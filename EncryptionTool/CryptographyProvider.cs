@@ -4,15 +4,17 @@ using System.Text;
 
 public class CryptographyProvider
 {
-     public const int KeySize = 256;
-     public const int BlockSize = 128;
+     public const int EncryptionKeySize = 256;
+     public const int EncryptionBlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
+     
+     #region Public API Functions
      
      public void EncryptFileWithPersonalKey(string path, string personalKey)
      {
           using (FileStream input = new FileStream(path, FileMode.Open))
           {
-               string outputPath = this.GetPathForEncryptedFile(path);
+               string outputPath = Path.Combine(path, ".aes");
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     this.EncryptWithPersonalKey(input, output, personalKey);
@@ -26,7 +28,7 @@ public class CryptographyProvider
      {
           using (FileStream input = new FileStream(path, FileMode.Open))
           {
-               string outputPath = this.GetPathForOriginalFile(path);
+               string outputPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     this.DecryptWithPersonalKey(input, output, personalKey);
@@ -34,16 +36,6 @@ public class CryptographyProvider
           }
 
           Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
-     }
-
-     private string GetPathForEncryptedFile(string originalPath)
-     {
-          return Path.Combine(originalPath, ".aes");
-     }
-     
-     private string GetPathForOriginalFile(string encryptedPath)
-     {
-          return Path.Combine(Path.GetDirectoryName(encryptedPath), Path.GetFileNameWithoutExtension(encryptedPath));
      }
 
      public string EncryptStringWithPersonalKey(string original, string personalKey)
@@ -73,27 +65,10 @@ public class CryptographyProvider
           }
           return original;
      }
+     
+     #endregion
 
-     private byte[] CalculateCipherFromPersonalKey(string personalKey, ref byte[] salt, ref byte[] iv)
-     {
-          byte[] cipher;
-          if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
-          {
-               salt = new byte[CryptographyProvider.KeySize / 8];
-               iv = new byte[CryptographyProvider.BlockSize / 8];
-               
-               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-               {
-                    rng.GetBytes(salt);
-                    rng.GetBytes(iv);
-               }
-          }
-          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(personalKey, salt))
-          {
-               cipher = pbkdf2.GetBytes(CryptographyProvider.KeySize / 8);
-          }
-          return cipher;
-     }
+     #region Internal AES Functions
 
      private void EncryptWithPersonalKey(Stream input, Stream output, string personalKey)
      {
@@ -102,16 +77,16 @@ public class CryptographyProvider
           
           using (RijndaelManaged aes = new RijndaelManaged())
           {
-               aes.KeySize = CryptographyProvider.KeySize;
-               aes.BlockSize = CryptographyProvider.BlockSize;
+               aes.KeySize = CryptographyProvider.EncryptionKeySize;
+               aes.BlockSize = CryptographyProvider.EncryptionBlockSize;
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
 
-               aes.Key = this.CalculateCipherFromPersonalKey(personalKey, ref salt, ref iv);
+               aes.Key = this.RecalculateCipherPermutation(personalKey, ref salt, ref iv);
                aes.IV = iv;
                
-               output.Write(salt, 0, CryptographyProvider.KeySize / 8);
-               output.Write(iv, 0, CryptographyProvider.BlockSize / 8);
+               output.Write(salt, 0, CryptographyProvider.EncryptionKeySize / 8);
+               output.Write(iv, 0, CryptographyProvider.EncryptionBlockSize / 8);
                
                this.EncryptToStream(input, output, aes.CreateEncryptor());
           }
@@ -119,24 +94,45 @@ public class CryptographyProvider
 
      private void DecryptWithPersonalKey(Stream input, Stream output, string personalKey)
      {
-          byte[] salt = new byte[CryptographyProvider.KeySize / 8];
-          byte[] iv = new byte[CryptographyProvider.BlockSize / 8];
+          byte[] salt = new byte[CryptographyProvider.EncryptionKeySize / 8];
+          byte[] iv = new byte[CryptographyProvider.EncryptionBlockSize / 8];
           
-          input.Read(salt, 0, CryptographyProvider.KeySize / 8);
-          input.Read(iv, 0, CryptographyProvider.BlockSize / 8);
+          input.Read(salt, 0, CryptographyProvider.EncryptionKeySize / 8);
+          input.Read(iv, 0, CryptographyProvider.EncryptionBlockSize / 8);
 
           using (RijndaelManaged aes = new RijndaelManaged())
           {
-               aes.KeySize = CryptographyProvider.KeySize;
-               aes.BlockSize = CryptographyProvider.BlockSize;
+               aes.KeySize = CryptographyProvider.EncryptionKeySize;
+               aes.BlockSize = CryptographyProvider.EncryptionBlockSize;
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
                
-               aes.Key = this.CalculateCipherFromPersonalKey(personalKey, ref salt, ref iv);
+               aes.Key = this.RecalculateCipherPermutation(personalKey, ref salt, ref iv);
                aes.IV = iv;
                
                this.DecryptFromStream(input, output, aes.CreateDecryptor());
           }
+     }
+     
+     private byte[] RecalculateCipherPermutation(string personalKey, ref byte[] salt, ref byte[] iv)
+     {
+          byte[] permutation;
+          if (salt == null || iv == null) // If new salt and vector is necessary (needed for every new encryption), leave salt and iv buffers null.
+          {
+               salt = new byte[CryptographyProvider.EncryptionKeySize / 8];
+               iv = new byte[CryptographyProvider.EncryptionBlockSize / 8];
+               
+               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+               {
+                    rng.GetBytes(salt);
+                    rng.GetBytes(iv);
+               }
+          }
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(personalKey, salt, 10000))
+          {
+               permutation = pbkdf2.GetBytes(CryptographyProvider.EncryptionKeySize / 8);
+          }
+          return permutation;
      }
 
      private void EncryptToStream(Stream input, Stream output, ICryptoTransform encryptor)
@@ -173,4 +169,19 @@ public class CryptographyProvider
                }
           }
      }
+     
+     #endregion
+     
+     #region Internal Hashing Functions
+
+     private void HashToStream(Stream input, Stream output)
+     {
+          using (SHA256 sha = SHA256.Create())
+          {
+               byte[] hash = sha.ComputeHash(input);
+               output.Write(hash, 0, hash.Length);
+          }
+     }
+     
+     #endregion
 }
