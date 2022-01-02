@@ -16,7 +16,7 @@ public class CryptographyProvider
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string encryptedFileName = this.HashFile(path) + ".aes";
+               string encryptedFileName = this.HashFileToString(path) + ".aes";
                string directoryName = Path.GetDirectoryName(path);
 
                outputPath = Path.Combine(directoryName, encryptedFileName);
@@ -32,12 +32,13 @@ public class CryptographyProvider
                }
           }
 
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted.");
+          Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted to disk.");
           return outputPath;
      }
 
-     public void DecryptFileToDiskWithPersonalKey(string path, string personalKey)
+     public string DecryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
+          string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
                byte[] originalFileNameLength = new byte[4];
@@ -48,14 +49,36 @@ public class CryptographyProvider
 
                string originalFileName = this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
 
-               string outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
+               outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     this.DecryptToStreamWithPersonalKey(input, output, personalKey);
                }
           }
 
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted.");
+          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
+          return outputPath;
+     }
+
+     public byte[] DecryptFileToMemoryWithPersonalKey(string path, string personalKey)
+     {
+          byte[] buffer;
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
+               byte[] originalFileNameLength = new byte[4];
+               input.Read(originalFileNameLength, 0, 4);
+
+               byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
+               input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    buffer = output.ToArray();
+               }
+          }
+
+          return buffer;
      }
 
      public byte[] EncryptStringWithPersonalKey(string original, string personalKey)
@@ -72,12 +95,23 @@ public class CryptographyProvider
           return original;
      }
 
-     public string HashFile(string path)
+     public string HashFileToString(string path)
      {
           string hash;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           { 
                hash = this.HashToString(input, false);
+          }
+
+          return hash;
+     }
+
+     public string HashBufferToString(byte[] buffer)
+     {
+          string hash;
+          using (MemoryStream stream = new MemoryStream(buffer))
+          { 
+               hash = this.HashToString(stream, false);
           }
 
           return hash;
