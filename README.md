@@ -16,16 +16,16 @@ This encryption tool provides a portable, lightweight, and bloatware free interf
 
 Encrypt a file:
 
-```
+```c#
 encrypt "C:\Users\Elorith\Documents\MyFile.txt"
 ```
 
 Decrypt a file:
-```
+```c#
 decrypt "C:\Users\Elorith\Documents\31dcfe763b6676217d8ff213c0297721c71696df2251f4af4c188c01f34efa78.aes"
 ```
 
 Exit the application:
-```
+```c#
 exit
 ```
