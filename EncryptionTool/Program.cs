@@ -31,7 +31,7 @@ public class Program
             {
                 try
                 {
-                    application.DoFileEncryption(split[1]);
+                    application.DoFileEncryption(split[1].Trim('"'));
                 }
                 catch (Exception ex)
                 {
@@ -42,16 +42,24 @@ public class Program
             {
                 try
                 {
-                    application.DoFileDecryption(split[1]);
+                    application.DoFileDecryption(split[1].Trim('"'));
                 }
                 catch (Exception ex)
                 {
                     Logger.Singleton.WriteLine(ex.Message);
                 }
             }
+            else if (string.Equals(split[0], "exit", StringComparison.OrdinalIgnoreCase))
+            {
+                break;
+            }
+            else
+            {
+                Logger.Singleton.WriteLine("Specified command was not recognised.");
+            }
         }
     }
-    
+
     private EncryptionTool CreateCommandLineInterfaceTool()
     {
         EncryptionTool application = new EncryptionTool();
@@ -72,14 +80,14 @@ public class Program
         {
             Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
 
-            return Console.ReadLine();
+            return this.ReadPasswordFromConsoleLine();
         });
         
         application.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("Please re-enter the password.");
 
-            return Console.ReadLine();
+            return this.ReadPasswordFromConsoleLine();
         });
         
         application.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
@@ -101,7 +109,7 @@ public class Program
         {
             Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
             
-            return Console.ReadLine();
+            return this.ReadPasswordFromConsoleLine();
         });
         
         application.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
@@ -110,5 +118,33 @@ public class Program
         });
 
         return application;
+    }
+
+    private string ReadPasswordFromConsoleLine()
+    {
+        string input = string.Empty;
+        
+        ConsoleKey key;
+        do
+        {
+            var keyInfo = Console.ReadKey(true);
+            key = keyInfo.Key;
+
+            if (key == ConsoleKey.Backspace && input.Length > 0)
+            {
+                Console.Write("\b \b");
+                input = input.Remove(input.Length - 1, 1);
+            }
+            else if (!char.IsControl(keyInfo.KeyChar))
+            {
+                Console.Write("*");
+                input += keyInfo.KeyChar;
+            }
+        }
+        while (key != ConsoleKey.Enter);
+
+        Console.Write("\n");
+        
+        return input;
     }
 } 
