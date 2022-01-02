@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 public class Program
 {
@@ -54,50 +55,8 @@ public class Program
             if (response != "y")
             {
                 exitFlag = true;
-            }   
+            }
         }
-    }
-
-    public void DoFileEncryption(string path)
-    {
-        if (!File.Exists(path))
-        {
-            throw new ArgumentException("Specified path is not a file or does not exist");
-        }
-        
-        Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
-        string response = Console.ReadLine();
-        
-        Logger.Singleton.WriteLine("Please re-enter the password.");
-        string response2 = Console.ReadLine();
-
-        if (response != response2)
-        {
-            Logger.Singleton.WriteLine("Passwords do not match!");
-            return;
-        }
-
-        CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.EncryptFileWithPersonalKey(path, response);
-        
-        this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
-    }
-    
-    public void DoFileDecryption(string path)
-    {
-        if (!File.Exists(path))
-        {
-            throw new ArgumentException("Specified path is not a file or does not exist");
-        }
-        
-        Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
-        
-        string response = Console.ReadLine();
-
-        CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.DecryptFileWithPersonalKey(path, response);
-        
-        File.Delete(path);
     }
     
     public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
@@ -115,5 +74,62 @@ public class Program
 
         SecureEraser eraser = new SecureEraser();
         eraser.ErasePath(path, type);
+    }
+    
+    [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
+    public static extern bool ZeroMemory(IntPtr destination, int length);
+
+    public void DoFileEncryption(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new ArgumentException("Specified path is not a file or does not exist");
+        }
+        
+        Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
+        string response = Console.ReadLine();
+
+        Logger.Singleton.WriteLine("Please re-enter the password.");
+        string response2 = Console.ReadLine();
+        
+        GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned); 
+        GCHandle response2Handle = GCHandle.Alloc(response, GCHandleType.Pinned); 
+
+        if (response != response2)
+        {
+            Logger.Singleton.WriteLine("Passwords do not match!");
+            return;
+        }
+
+        CryptographyProvider cryptography = new CryptographyProvider();
+        cryptography.EncryptFileWithPersonalKey(path, response);
+        
+        Program.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
+        responseHandle.Free();
+        Program.ZeroMemory(response2Handle.AddrOfPinnedObject(), response2.Length * 2);
+        response2Handle.Free();
+        
+        this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
+    }
+    
+    public void DoFileDecryption(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new ArgumentException("Specified path is not a file or does not exist");
+        }
+        
+        Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
+        
+        string response = Console.ReadLine();
+        GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned); 
+
+        CryptographyProvider cryptography = new CryptographyProvider();
+        cryptography.DecryptFileWithPersonalKey(path, response);
+        
+        Program.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
+        responseHandle.Free();
+        
+        File.Delete(path);
     }
 } 
