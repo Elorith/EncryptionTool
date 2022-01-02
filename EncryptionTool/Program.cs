@@ -18,45 +18,37 @@ public class Program
 
         EncryptionTool application = this.CreateCommandLineInterfaceTool();
 
-        bool exitFlag = false;
-        while (!exitFlag)
+        while (true)
         {
-            Logger.Singleton.WriteLine("Perform encryption or decryption? (1 = Encrypt, 2 = Decrypt)");
-            ConsoleKeyInfo info = Console.ReadKey();
-            Console.WriteLine();
-            
-            if (info.Key == ConsoleKey.D1)
-            {
-                Logger.Singleton.WriteLine("Please enter the path of the file to encrypt.");
-                try
-                {
-                    application.DoFileEncryption(Console.ReadLine());
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (info.Key == ConsoleKey.D2)
-            {
-                Logger.Singleton.WriteLine("Please enter the path of the file to decrypt.");
-                try
-                {
-                    application.DoFileDecryption(Console.ReadLine());
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            
-            Logger.Singleton.WriteLine("Exit now (Y/N)?");
-            string response = Console.ReadLine();
-            if (response != "Y" && response != "y")
+            string command = Console.ReadLine();
+            if (command == null)
             {
                 continue;
             }
-            exitFlag = true;
+            
+            string[] split = command.Split(' ');
+            if (string.Equals(split[0], "encrypt", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    application.DoFileEncryption(split[1]);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton.WriteLine(ex.Message);
+                }
+            }
+            else if (string.Equals(split[0], "decrypt", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    application.DoFileDecryption(split[1]);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton.WriteLine(ex.Message);
+                }
+            }
         }
     }
     
