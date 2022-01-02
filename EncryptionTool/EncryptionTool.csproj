@@ -40,6 +40,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="CryptographyProvider.cs" />
+        <Compile Include="EncryptionTool.cs" />
         <Compile Include="SanitisationAlgorithmType.cs" />
         <Compile Include="Logger.cs" />
         <Compile Include="Program.cs" />
