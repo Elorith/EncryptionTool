@@ -2,7 +2,7 @@
 
 ## Description
 
-This encryption tool provides a portable, lightweight, and bloatware free interface for easy encryption and decryption of sensitive data on the Windows platform.
+This tool provides a portable, lightweight, and bloatware free interface for easy encryption and decryption of sensitive data on the Windows platform.
 
 ## Features
 
