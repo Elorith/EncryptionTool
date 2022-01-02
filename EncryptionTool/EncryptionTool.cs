@@ -23,9 +23,6 @@ public class EncryptionTool
     public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
     public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
 
-    [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
-    private static extern bool ZeroMemory(IntPtr destination, int length);
-
     public void DoFileEncryption(string path)
     {
         if (!File.Exists(path))
@@ -34,10 +31,10 @@ public class EncryptionTool
         }
         
         string response = this.OnAskUserToEnterPasswordForEncryption(path);
-        GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned);
+        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(response);
         
         string response2 = this.OnAskUserToRepeatPasswordForEncryption(path);
-        GCHandle response2Handle = GCHandle.Alloc(response2, GCHandleType.Pinned);
+        GCHandle handle2 = this.AllocatePinnedGarbageCollectionHandle(response2);
 
         if (response != response2)
         {
@@ -45,8 +42,7 @@ public class EncryptionTool
             return;
         }
         
-        EncryptionTool.ZeroMemory(response2Handle.AddrOfPinnedObject(), response2.Length * 2);
-        response2Handle.Free();
+        this.FreePinnedGarbageCollectionHandle(handle2, response2.Length * 2);
 
         CryptographyProvider cryptography = new CryptographyProvider();
         string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, response);
@@ -66,9 +62,8 @@ public class EncryptionTool
             throw new CryptographicException("Encryption verification process failed");
         }
         this.OnEncryptionVerificationProcessSuccess();
-
-        EncryptionTool.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
-        responseHandle.Free();
+        
+        this.FreePinnedGarbageCollectionHandle(handle, response.Length * 2);
 
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
 
@@ -109,5 +104,19 @@ public class EncryptionTool
 
         SecureEraser eraser = new SecureEraser();
         eraser.ErasePath(path, type);
+    }
+    
+    [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
+    private static extern bool ZeroMemory(IntPtr destination, int length);
+
+    private GCHandle AllocatePinnedGarbageCollectionHandle(object value)
+    {
+        return GCHandle.Alloc(value, GCHandleType.Pinned);
+    }
+
+    private void FreePinnedGarbageCollectionHandle(GCHandle handle, int length)
+    {
+        EncryptionTool.ZeroMemory(handle.AddrOfPinnedObject(), length);
+        handle.Free();
     }
 }
