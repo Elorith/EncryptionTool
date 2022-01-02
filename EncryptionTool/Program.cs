@@ -108,6 +108,22 @@ public class Program
 
         CryptographyProvider cryptography = new CryptographyProvider();
         string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, response);
+        
+        try
+        {
+            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, response);
+            string hash = cryptography.HashBufferToString(decrypted);
+
+            if (hash != Path.GetFileNameWithoutExtension(outputPath))
+            {
+                throw new CryptographicException("Encryption verification process failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new CryptographicException("Encryption verification process failed");
+        }
+        Logger.Singleton.WriteLine("Encryption verification process successful.");
 
         Program.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
         responseHandle.Free();
