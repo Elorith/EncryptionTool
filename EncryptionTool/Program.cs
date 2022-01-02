@@ -26,7 +26,7 @@ public class Program
                 continue;
             }
             
-            string[] split = command.Split(' ');
+            string[] split = command.Split(new []{' '},2);
             if (string.Equals(split[0], "encrypt", StringComparison.OrdinalIgnoreCase))
             {
                 try
