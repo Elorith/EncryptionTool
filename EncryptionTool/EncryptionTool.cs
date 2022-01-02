@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 
 public class EncryptionTool
 {
-    public delegate bool OnAskUserForEraseConfirmationCallback(string path);
     public delegate string OnAskUserToEnterPasswordForEncryptionCallback(string path);
     public delegate string OnAskUserToRepeatPasswordForEncryptionCallback(string path);
     public delegate void OnUserEnteredNonMatchingPasswordsCallback();
@@ -13,8 +12,8 @@ public class EncryptionTool
     public delegate void OnEncryptionAndSecureEraseProcessCompletedCallback();
     public delegate string OnAskUserToEnterPasswordForDecryptionCallback(string path);
     public delegate void OnDecryptionProcessCompletedCallback();
+    public delegate bool OnAskUserForEraseConfirmationCallback(string path);
     
-    public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
     public event OnAskUserToEnterPasswordForEncryptionCallback OnAskUserToEnterPasswordForEncryption;
     public event OnAskUserToRepeatPasswordForEncryptionCallback OnAskUserToRepeatPasswordForEncryption;
     public event OnUserEnteredNonMatchingPasswordsCallback OnUserEnteredNonMatchingPasswords;
@@ -22,24 +21,10 @@ public class EncryptionTool
     public event OnEncryptionAndSecureEraseProcessCompletedCallback OnEncryptionAndSecureEraseProcessCompleted;
     public event OnAskUserToEnterPasswordForDecryptionCallback OnAskUserToEnterPasswordForDecryption;
     public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
-    
-    public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
-    {
-        if (askForConfirmation)
-        {
-            bool result = this.OnAskUserForEraseConfirmation(path);
-            if (!result)
-            {
-                return;
-            }
-        }
+    public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
 
-        SecureEraser eraser = new SecureEraser();
-        eraser.ErasePath(path, type);
-    }
-    
     [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
-    public static extern bool ZeroMemory(IntPtr destination, int length);
+    private static extern bool ZeroMemory(IntPtr destination, int length);
 
     public void DoFileEncryption(string path)
     {
@@ -109,5 +94,20 @@ public class EncryptionTool
         File.Delete(path);
 
         this.OnDecryptionProcessCompleted();
+    }
+    
+    public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
+    {
+        if (askForConfirmation)
+        {
+            bool result = this.OnAskUserForEraseConfirmation(path);
+            if (!result)
+            {
+                return;
+            }
+        }
+
+        SecureEraser eraser = new SecureEraser();
+        eraser.ErasePath(path, type);
     }
 }

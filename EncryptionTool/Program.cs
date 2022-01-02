@@ -9,16 +9,14 @@ public class Program
      * 4) Securely erase user key from memory (ZeroMemory).
      * 5) Securely erase the original file from disk using implementation based on US DoD 5220.22-M (ECE).
      */
-    public static void Main(string[] args)
-    {
-        Program application = new Program();
-        application.RunCommandLineInterface();
-    }
+    public static void Main(string[] args) => new Program().RunCommandLineInterface();
 
     // Command-line interface implementation of the encryption tool.
     public void RunCommandLineInterface()
     {
-        EncryptionTool tool = this.CreateCommandLineInterfaceTool();
+        Console.Title = "Encryption Tool";
+
+        EncryptionTool application = this.CreateCommandLineInterfaceTool();
 
         bool exitFlag = false;
         while (!exitFlag)
@@ -32,7 +30,7 @@ public class Program
                 Logger.Singleton.WriteLine("Please enter the path of the file to encrypt.");
                 try
                 {
-                    tool.DoFileEncryption(Console.ReadLine());
+                    application.DoFileEncryption(Console.ReadLine());
                 }
                 catch (Exception ex)
                 {
@@ -44,7 +42,7 @@ public class Program
                 Logger.Singleton.WriteLine("Please enter the path of the file to decrypt.");
                 try
                 {
-                    tool.DoFileDecryption(Console.ReadLine());
+                    application.DoFileDecryption(Console.ReadLine());
                 }
                 catch (Exception ex)
                 {
@@ -64,9 +62,9 @@ public class Program
     
     private EncryptionTool CreateCommandLineInterfaceTool()
     {
-        EncryptionTool tool = new EncryptionTool();
+        EncryptionTool application = new EncryptionTool();
         
-        tool.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
+        application.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
         {
             Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
             string response = Console.ReadLine();
@@ -78,47 +76,47 @@ public class Program
             return true;
         });
         
-        tool.OnAskUserToEnterPasswordForEncryption += new EncryptionTool.OnAskUserToEnterPasswordForEncryptionCallback((path) =>
+        application.OnAskUserToEnterPasswordForEncryption += new EncryptionTool.OnAskUserToEnterPasswordForEncryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
 
             return Console.ReadLine();
         });
         
-        tool.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
+        application.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("Please re-enter the password.");
 
             return Console.ReadLine();
         });
         
-        tool.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
+        application.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
         {
             Logger.Singleton.WriteLine("Passwords do not match!");
         });
         
-        tool.OnEncryptionVerificationProcessSuccess += new EncryptionTool.OnEncryptionVerificationProcessSuccessCallback(() =>
+        application.OnEncryptionVerificationProcessSuccess += new EncryptionTool.OnEncryptionVerificationProcessSuccessCallback(() =>
         {
             Logger.Singleton.WriteLine("Encryption verification process successful.");
         });
         
-        tool.OnEncryptionAndSecureEraseProcessCompleted += new EncryptionTool.OnEncryptionAndSecureEraseProcessCompletedCallback(() =>
+        application.OnEncryptionAndSecureEraseProcessCompleted += new EncryptionTool.OnEncryptionAndSecureEraseProcessCompletedCallback(() =>
         {
             Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
         });
         
-        tool.OnAskUserToEnterPasswordForDecryption += new EncryptionTool.OnAskUserToEnterPasswordForDecryptionCallback((path) =>
+        application.OnAskUserToEnterPasswordForDecryption += new EncryptionTool.OnAskUserToEnterPasswordForDecryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
             
             return Console.ReadLine();
         });
         
-        tool.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
+        application.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
         {
             Logger.Singleton.WriteLine("Decryption process successfully completed.");
         });
 
-        return tool;
+        return application;
     }
 } 
