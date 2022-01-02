@@ -5,16 +5,33 @@ using System.Security.Cryptography;
 
 public class EncryptionTool
 {
+    public delegate bool OnAskUserForEraseConfirmationCallback(string path);
+    public delegate string OnAskUserToEnterPasswordForEncryptionCallback(string path);
+    public delegate string OnAskUserToRepeatPasswordForEncryptionCallback(string path);
+    public delegate void OnUserEnteredNonMatchingPasswordsCallback();
+    public delegate void OnEncryptionVerificationProcessSuccessCallback();
+    public delegate void OnEncryptionAndSecureEraseProcessCompletedCallback();
+    public delegate string OnAskUserToEnterPasswordForDecryptionCallback(string path);
+    public delegate void OnDecryptionProcessCompletedCallback();
+    
+    public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
+    public event OnAskUserToEnterPasswordForEncryptionCallback OnAskUserToEnterPasswordForEncryption;
+    public event OnAskUserToRepeatPasswordForEncryptionCallback OnAskUserToRepeatPasswordForEncryption;
+    public event OnUserEnteredNonMatchingPasswordsCallback OnUserEnteredNonMatchingPasswords;
+    public event OnEncryptionVerificationProcessSuccessCallback OnEncryptionVerificationProcessSuccess;
+    public event OnEncryptionAndSecureEraseProcessCompletedCallback OnEncryptionAndSecureEraseProcessCompleted;
+    public event OnAskUserToEnterPasswordForDecryptionCallback OnAskUserToEnterPasswordForDecryption;
+    public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
+    
     public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
     {
         if (askForConfirmation)
         {
-            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
-            string response = Console.ReadLine();
-            if (response != "Y" && response != "y")
+            bool result = this.OnAskUserForEraseConfirmation(path);
+            if (!result)
             {
                 return;
-            }   
+            }
         }
 
         SecureEraser eraser = new SecureEraser();
@@ -31,17 +48,15 @@ public class EncryptionTool
             throw new ArgumentException("Specified path is not a file or does not exist");
         }
         
-        Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
-        string response = Console.ReadLine();
+        string response = this.OnAskUserToEnterPasswordForEncryption(path);
         GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned);
-
-        Logger.Singleton.WriteLine("Please re-enter the password.");
-        string response2 = Console.ReadLine();
+        
+        string response2 = this.OnAskUserToRepeatPasswordForEncryption(path);
         GCHandle response2Handle = GCHandle.Alloc(response2, GCHandleType.Pinned);
 
         if (response != response2)
         {
-            Logger.Singleton.WriteLine("Passwords do not match!");
+            this.OnUserEnteredNonMatchingPasswords();
             return;
         }
         
@@ -65,14 +80,14 @@ public class EncryptionTool
         {
             throw new CryptographicException("Encryption verification process failed");
         }
-        Logger.Singleton.WriteLine("Encryption verification process successful.");
+        this.OnEncryptionVerificationProcessSuccess();
 
         EncryptionTool.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
         responseHandle.Free();
 
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
-        
-        Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
+
+        this.OnEncryptionAndSecureEraseProcessCompleted();
     }
     
     public void DoFileDecryption(string path)
@@ -81,10 +96,8 @@ public class EncryptionTool
         {
             throw new ArgumentException("Specified path is not a file or does not exist");
         }
-        
-        Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
-        
-        string response = Console.ReadLine();
+
+        string response = this.OnAskUserToEnterPasswordForDecryption(path);
         GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned); 
 
         CryptographyProvider cryptography = new CryptographyProvider();
@@ -94,7 +107,7 @@ public class EncryptionTool
         responseHandle.Free();
         
         File.Delete(path);
-        
-        Logger.Singleton.WriteLine("Decryption process successfully completed.");
+
+        this.OnDecryptionProcessCompleted();
     }
 }

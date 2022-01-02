@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 public class Program
 {
@@ -15,18 +12,18 @@ public class Program
     public static void Main(string[] args)
     {
         Program application = new Program();
-        application.CommandLineInterface();
+        application.RunCommandLineInterface();
     }
 
     // Command-line interface implementation of the encryption tool.
-    public void CommandLineInterface()
+    public void RunCommandLineInterface()
     {
-        EncryptionTool tool = new EncryptionTool();
+        EncryptionTool tool = this.CreateCommandLineInterfaceTool();
 
         bool exitFlag = false;
         while (!exitFlag)
         {
-            Logger.Singleton.WriteLine("Perform encryption or decryption? (Encrypt = 1; Decrypt = 2)");
+            Logger.Singleton.WriteLine("Perform encryption or decryption? (1 = Encrypt, 2 = Decrypt)");
             ConsoleKeyInfo info = Console.ReadKey();
             Console.WriteLine();
             
@@ -63,5 +60,65 @@ public class Program
             }
             exitFlag = true;
         }
+    }
+    
+    private EncryptionTool CreateCommandLineInterfaceTool()
+    {
+        EncryptionTool tool = new EncryptionTool();
+        
+        tool.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
+        {
+            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
+            string response = Console.ReadLine();
+            if (response != "Y" && response != "y")
+            {
+                return false;
+            }
+
+            return true;
+        });
+        
+        tool.OnAskUserToEnterPasswordForEncryption += new EncryptionTool.OnAskUserToEnterPasswordForEncryptionCallback((path) =>
+        {
+            Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
+
+            return Console.ReadLine();
+        });
+        
+        tool.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
+        {
+            Logger.Singleton.WriteLine("Please re-enter the password.");
+
+            return Console.ReadLine();
+        });
+        
+        tool.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
+        {
+            Logger.Singleton.WriteLine("Passwords do not match!");
+        });
+        
+        tool.OnEncryptionVerificationProcessSuccess += new EncryptionTool.OnEncryptionVerificationProcessSuccessCallback(() =>
+        {
+            Logger.Singleton.WriteLine("Encryption verification process successful.");
+        });
+        
+        tool.OnEncryptionAndSecureEraseProcessCompleted += new EncryptionTool.OnEncryptionAndSecureEraseProcessCompletedCallback(() =>
+        {
+            Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
+        });
+        
+        tool.OnAskUserToEnterPasswordForDecryption += new EncryptionTool.OnAskUserToEnterPasswordForDecryptionCallback((path) =>
+        {
+            Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
+            
+            return Console.ReadLine();
+        });
+        
+        tool.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
+        {
+            Logger.Singleton.WriteLine("Decryption process successfully completed.");
+        });
+
+        return tool;
     }
 } 
