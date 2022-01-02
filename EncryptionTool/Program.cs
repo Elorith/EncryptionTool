@@ -15,7 +15,7 @@ public class Program
          * 4) Securely erase user key from memory (ZeroMemory).
          * 5) Securely erase the original file from disk using implementation based on US DoD 5220.22-M (ECE).
          */
-        
+
         Program application = new Program();
 
         bool exitFlag = false;
@@ -52,7 +52,7 @@ public class Program
             
             Logger.Singleton.WriteLine("Exit now (Y/N)?");
             string response = Console.ReadLine();
-            if (response != "Y" || response != "y")
+            if (response != "Y" && response != "y")
             {
                 continue;
             }
@@ -66,7 +66,7 @@ public class Program
         {
             Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
             string response = Console.ReadLine();
-            if (response != "Y" || response != "y")
+            if (response != "Y" && response != "y")
             {
                 return;
             }   
