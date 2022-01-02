@@ -8,33 +8,35 @@ public class CryptographyProvider
      public const int EncryptionKeySize = 256;
      public const int EncryptionBlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
-     
+
      #region Public API Functions
-     
-     public void EncryptFileWithPersonalKey(string path, string personalKey)
+
+     public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
+          string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string encryptedFileName = this.HashFile(path) + ".aes";
+               string encryptedFileName = this.HashFile(path);
                string directoryName = Path.GetDirectoryName(path);
 
-               string outputPath = Path.Combine(directoryName, encryptedFileName);
+               outputPath = Path.Combine(directoryName, encryptedFileName, ".aes");
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     byte[] originalFileName = this.EncryptStringWithPersonalKey(Path.GetFileName(path), personalKey);
                     byte[] originalFileNameLength = BitConverter.GetBytes(originalFileName.Length);
-                    
+
                     output.Write(originalFileNameLength, 0, 4);
                     output.Write(originalFileName, 0, originalFileName.Length);
-                    
+
                     this.EncryptToStreamWithPersonalKey(input, output, personalKey);
                }
           }
-          
+
           Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted.");
+          return outputPath;
      }
 
-     public void DecryptFileWithPersonalKey(string path, string personalKey)
+     public void DecryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
@@ -45,7 +47,7 @@ public class CryptographyProvider
                input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
 
                string originalFileName = this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
-               
+
                string outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {

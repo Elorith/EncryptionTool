@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 public class Program
 {
@@ -88,27 +89,27 @@ public class Program
         
         Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
         string response = Console.ReadLine();
+        GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned);
 
         Logger.Singleton.WriteLine("Please re-enter the password.");
         string response2 = Console.ReadLine();
-        
-        GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned); 
-        GCHandle response2Handle = GCHandle.Alloc(response, GCHandleType.Pinned); 
+        GCHandle response2Handle = GCHandle.Alloc(response, GCHandleType.Pinned);
 
         if (response != response2)
         {
             Logger.Singleton.WriteLine("Passwords do not match!");
             return;
         }
-
-        CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.EncryptFileWithPersonalKey(path, response);
         
-        Program.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
-        responseHandle.Free();
         Program.ZeroMemory(response2Handle.AddrOfPinnedObject(), response2.Length * 2);
         response2Handle.Free();
-        
+
+        CryptographyProvider cryptography = new CryptographyProvider();
+        string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, response);
+
+        Program.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
+        responseHandle.Free();
+
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
     }
     
@@ -125,7 +126,7 @@ public class Program
         GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned); 
 
         CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.DecryptFileWithPersonalKey(path, response);
+        cryptography.DecryptFileToDiskWithPersonalKey(path, response);
         
         Program.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
         responseHandle.Free();
