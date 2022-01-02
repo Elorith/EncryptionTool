@@ -53,12 +53,12 @@ public class Program
             }
             
             Logger.Singleton.WriteLine("Exit now (Y/N)?");
-            
             string response = Console.ReadLine();
-            if (response != "Y")
+            if (response != "Y" || response != "y")
             {
-                exitFlag = true;
+                continue;
             }
+            exitFlag = true;
         }
     }
     
@@ -67,9 +67,8 @@ public class Program
         if (askForConfirmation)
         {
             Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
-        
             string response = Console.ReadLine();
-            if (response != "Y")
+            if (response != "Y" || response != "y")
             {
                 return;
             }   
