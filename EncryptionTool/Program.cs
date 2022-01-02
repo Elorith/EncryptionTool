@@ -31,7 +31,6 @@ public class Program
                 try
                 {
                     application.DoFileEncryption(Console.ReadLine());
-                    Logger.Singleton.WriteLine("Encryption successfully completed.");
                 }
                 catch (Exception ex)
                 {
@@ -44,7 +43,6 @@ public class Program
                 try
                 {
                     application.DoFileDecryption(Console.ReadLine());
-                    Logger.Singleton.WriteLine("Decryption successfully completed.");
                 }
                 catch (Exception ex)
                 {
@@ -128,6 +126,8 @@ public class Program
         responseHandle.Free();
 
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
+        
+        Logger.Singleton.WriteLine("Encryption and secure erase successfully completed.");
     }
     
     public void DoFileDecryption(string path)
@@ -149,5 +149,7 @@ public class Program
         responseHandle.Free();
         
         File.Delete(path);
+        
+        Logger.Singleton.WriteLine("Decryption successfully completed.");
     }
 } 
