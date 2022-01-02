@@ -16,10 +16,10 @@ public class CryptographyProvider
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string encryptedFileName = this.HashFile(path);
+               string encryptedFileName = this.HashFile(path) + ".aes";
                string directoryName = Path.GetDirectoryName(path);
 
-               outputPath = Path.Combine(directoryName, encryptedFileName, ".aes");
+               outputPath = Path.Combine(directoryName, encryptedFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     byte[] originalFileName = this.EncryptStringWithPersonalKey(Path.GetFileName(path), personalKey);

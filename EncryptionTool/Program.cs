@@ -93,7 +93,7 @@ public class Program
 
         Logger.Singleton.WriteLine("Please re-enter the password.");
         string response2 = Console.ReadLine();
-        GCHandle response2Handle = GCHandle.Alloc(response, GCHandleType.Pinned);
+        GCHandle response2Handle = GCHandle.Alloc(response2, GCHandleType.Pinned);
 
         if (response != response2)
         {
