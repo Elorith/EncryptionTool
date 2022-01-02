@@ -127,7 +127,7 @@ public class Program
 
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
         
-        Logger.Singleton.WriteLine("Encryption and secure erase successfully completed.");
+        Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
     }
     
     public void DoFileDecryption(string path)
@@ -150,6 +150,6 @@ public class Program
         
         File.Delete(path);
         
-        Logger.Singleton.WriteLine("Decryption successfully completed.");
+        Logger.Singleton.WriteLine("Decryption process successfully completed.");
     }
 } 
