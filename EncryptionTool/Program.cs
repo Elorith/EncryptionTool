@@ -31,6 +31,7 @@ public class Program
                 try
                 {
                     application.DoFileEncryption(Console.ReadLine());
+                    Logger.Singleton.WriteLine("Encryption successfully completed.");
                 }
                 catch (Exception ex)
                 {
@@ -43,6 +44,7 @@ public class Program
                 try
                 {
                     application.DoFileDecryption(Console.ReadLine());
+                    Logger.Singleton.WriteLine("Decryption successfully completed.");
                 }
                 catch (Exception ex)
                 {
@@ -50,10 +52,10 @@ public class Program
                 }
             }
             
-            Logger.Singleton.WriteLine("Take another action (y/n)?");
+            Logger.Singleton.WriteLine("Exit now (Y/N)?");
             
             string response = Console.ReadLine();
-            if (response != "y")
+            if (response != "Y")
             {
                 exitFlag = true;
             }
@@ -64,10 +66,10 @@ public class Program
     {
         if (askForConfirmation)
         {
-            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (y/n)?");
+            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
         
             string response = Console.ReadLine();
-            if (response != "y")
+            if (response != "Y")
             {
                 return;
             }   
