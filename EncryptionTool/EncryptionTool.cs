@@ -42,7 +42,7 @@ public class EncryptionTool
             return;
         }
         
-        this.FreePinnedGarbageCollectionHandle(handle2, response2.Length * 2);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle2, response2.Length * 2);
 
         CryptographyProvider cryptography = new CryptographyProvider();
         string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, response);
@@ -50,7 +50,11 @@ public class EncryptionTool
         try
         {
             byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, response);
+            GCHandle handle3 = this.AllocatePinnedGarbageCollectionHandle(decrypted);
+            
             string hash = cryptography.HashBufferToString(decrypted);
+            
+            this.SecurelyReleasePinnedGarbageCollectionHandle(handle3, decrypted.Length);
 
             if (hash != Path.GetFileNameWithoutExtension(outputPath))
             {
@@ -63,7 +67,7 @@ public class EncryptionTool
         }
         this.OnEncryptionVerificationProcessSuccess();
         
-        this.FreePinnedGarbageCollectionHandle(handle, response.Length * 2);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, response.Length * 2);
 
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
 
@@ -83,7 +87,7 @@ public class EncryptionTool
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.DecryptFileToDiskWithPersonalKey(path, response);
         
-        this.FreePinnedGarbageCollectionHandle(handle, response.Length * 2);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, response.Length * 2);
         
         File.Delete(path);
 
@@ -113,7 +117,7 @@ public class EncryptionTool
         return GCHandle.Alloc(value, GCHandleType.Pinned);
     }
 
-    private void FreePinnedGarbageCollectionHandle(GCHandle handle, int length)
+    private void SecurelyReleasePinnedGarbageCollectionHandle(GCHandle handle, int length)
     {
         EncryptionTool.ZeroMemory(handle.AddrOfPinnedObject(), length);
         handle.Free();
