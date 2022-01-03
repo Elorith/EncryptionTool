@@ -27,7 +27,7 @@ decrypt "C:\Users\Elorith\Documents\31dcfe763b6676217d8ff213c0297721c71696df2251
 
 Erase a file:
 ```c#
-decrypt "C:\Users\Elorith\Documents\MyFile.txt2"
+erase "C:\Users\Elorith\Documents\MyFile.txt2"
 ```
 
 Exit the application:
