@@ -49,6 +49,17 @@ public class Program
                     Logger.Singleton.WriteLine(ex.Message);
                 }
             }
+            else if (string.Equals(split[0], "erase", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    application.DoSecureErase(split[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton.WriteLine(ex.Message);
+                }
+            }
             else if (string.Equals(split[0], "exit", StringComparison.OrdinalIgnoreCase))
             {
                 break;
