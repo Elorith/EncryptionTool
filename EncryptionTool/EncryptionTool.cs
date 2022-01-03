@@ -78,13 +78,12 @@ public class EncryptionTool
         }
 
         string response = this.OnAskUserToEnterPasswordForDecryption(path);
-        GCHandle responseHandle = GCHandle.Alloc(response, GCHandleType.Pinned); 
+        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(response);
 
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.DecryptFileToDiskWithPersonalKey(path, response);
         
-        EncryptionTool.ZeroMemory(responseHandle.AddrOfPinnedObject(), response.Length * 2);
-        responseHandle.Free();
+        this.FreePinnedGarbageCollectionHandle(handle, response.Length * 2);
         
         File.Delete(path);
 
