@@ -6,7 +6,7 @@ public class Program
      * 1) Take original file and encrypt using the user's personal key (which needs to be entered each time a security related action is taken).
      * 2) Write encrypted variation of the file to disk.
      * 3) Verify that the newly written file is valid by decrypting it from disk and checking it is identical.
-     * 4) Securely erase user key from memory (ZeroMemory).
+     * 4) Securely release user key from memory (ZeroMemory).
      * 5) Securely erase the original file from disk using implementation based on US DoD 5220.22-M (ECE).
      */
     public static void Main(string[] args) => new Program().RunCommandLineInterface();
@@ -26,7 +26,7 @@ public class Program
                 continue;
             }
             
-            string[] split = command.Split(' ');
+            string[] split = command.Split(new []{' '},2);
             if (string.Equals(split[0], "encrypt", StringComparison.OrdinalIgnoreCase))
             {
                 try
@@ -43,6 +43,17 @@ public class Program
                 try
                 {
                     application.DoFileDecryption(split[1].Trim('"'));
+                }
+                catch (Exception ex)
+                {
+                    Logger.Singleton.WriteLine(ex.Message);
+                }
+            }
+            else if (string.Equals(split[0], "erase", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    application.DoSecureErase(split[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
                 }
                 catch (Exception ex)
                 {
