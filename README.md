@@ -25,6 +25,11 @@ Decrypt a file:
 decrypt "C:\Users\Elorith\Documents\31dcfe763b6676217d8ff213c0297721c71696df2251f4af4c188c01f34efa78.aes"
 ```
 
+Erase a file:
+```c#
+decrypt "C:\Users\Elorith\Documents\MyFile.txt2"
+```
+
 Exit the application:
 ```c#
 exit
