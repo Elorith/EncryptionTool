@@ -17,17 +17,17 @@ This tool provides a portable, lightweight, and bloatware free interface for eas
 Encrypt a file:
 
 ```c#
-encrypt "C:\Users\Elorith\Documents\MyFile.txt"
+encrypt "C:\Users\Elorith\Documents\FileThatIWantToEncrypt.txt"
 ```
 
 Decrypt a file:
 ```c#
-decrypt "C:\Users\Elorith\Documents\31dcfe763b6676217d8ff213c0297721c71696df2251f4af4c188c01f34efa78.aes"
+decrypt "C:\Users\Elorith\Documents\FileThatIWantToDecrypt.aes"
 ```
 
 Erase a file:
 ```c#
-erase "C:\Users\Elorith\Documents\MyFile.txt2"
+erase "C:\Users\Elorith\Documents\FileThatIWantToErase.txt"
 ```
 
 Exit the application:
