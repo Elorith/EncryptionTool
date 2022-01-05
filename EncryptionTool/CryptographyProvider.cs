@@ -138,22 +138,22 @@ public class CryptographyProvider
 
      private void EncryptHeaderToStream(string header, Stream output, string personalKey)
      {
-          byte[] originalFileName = this.EncryptStringWithPersonalKey(header, personalKey);
-          byte[] originalFileNameLength = BitConverter.GetBytes(originalFileName.Length);
+          byte[] headerBytes = this.EncryptStringWithPersonalKey(header, personalKey);
+          byte[] headerLengthBytes = BitConverter.GetBytes(headerBytes.Length);
 
-          output.Write(originalFileNameLength, 0, 4);
-          output.Write(originalFileName, 0, originalFileName.Length);
+          output.Write(headerLengthBytes, 0, 4);
+          output.Write(headerBytes, 0, headerBytes.Length);
      }
 
      private string DecryptHeaderFromStream(Stream input, string personalKey)
      {
-          byte[] originalFileNameLength = new byte[4];
-          input.Read(originalFileNameLength, 0, 4);
+          byte[] headerLengthBytes = new byte[4];
+          input.Read(headerLengthBytes, 0, 4);
 
-          byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
-          input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+          byte[] headerBytes = new byte[BitConverter.ToInt32(headerLengthBytes, 0)];
+          input.Read(headerBytes, 0, headerBytes.Length);
           
-          return this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
+          return this.DecryptStringWithPersonalKey(headerBytes, personalKey);
      }
 
      private void EncryptBodyToStream(Stream input, Stream output, string personalKey)
