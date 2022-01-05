@@ -22,13 +22,10 @@ public class CryptographyProvider
                outputPath = Path.Combine(directoryName, encryptedFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    byte[] originalFileName = this.EncryptStringWithPersonalKey(Path.GetFileName(path), personalKey);
-                    byte[] originalFileNameLength = BitConverter.GetBytes(originalFileName.Length);
-
-                    output.Write(originalFileNameLength, 0, 4);
-                    output.Write(originalFileName, 0, originalFileName.Length);
-
-                    this.EncryptToStreamWithPersonalKey(input, output, personalKey);
+                    string originalFileName = Path.GetFileName(path);
+                    this.EncryptHeaderToStream(originalFileName, output, personalKey);
+                    
+                    this.EncryptBodyToStream(input, output, personalKey);
                }
           }
 
@@ -41,18 +38,12 @@ public class CryptographyProvider
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               byte[] originalFileNameLength = new byte[4];
-               input.Read(originalFileNameLength, 0, 4);
-
-               byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
-               input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
-
-               string originalFileName = this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
+               string originalFileName = this.DecryptHeaderFromStream(input, personalKey);
 
                outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.DecryptBodyFromStream(input, output, personalKey);
                }
           }
 
@@ -65,15 +56,11 @@ public class CryptographyProvider
           byte[] buffer;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               byte[] originalFileNameLength = new byte[4];
-               input.Read(originalFileNameLength, 0, 4);
-
-               byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
-               input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+               this.DecryptHeaderFromStream(input, personalKey);
 
                using (MemoryStream output = new MemoryStream())
                {
-                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.DecryptBodyFromStream(input, output, personalKey);
                     buffer = output.ToArray();
                }
           }
@@ -128,7 +115,7 @@ public class CryptographyProvider
           {
                using (MemoryStream output = new MemoryStream())
                {
-                    this.EncryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.EncryptBodyToStream(input, output, personalKey);
                     encrypted = output.ToArray();
                }
           }
@@ -142,14 +129,34 @@ public class CryptographyProvider
           {
                using (MemoryStream output = new MemoryStream())
                {
-                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.DecryptBodyFromStream(input, output, personalKey);
                     original = output.ToArray();
                }
           }
           return original;
      }
 
-     private void EncryptToStreamWithPersonalKey(Stream input, Stream output, string personalKey)
+     private void EncryptHeaderToStream(string header, Stream output, string personalKey)
+     {
+          byte[] originalFileName = this.EncryptStringWithPersonalKey(header, personalKey);
+          byte[] originalFileNameLength = BitConverter.GetBytes(originalFileName.Length);
+
+          output.Write(originalFileNameLength, 0, 4);
+          output.Write(originalFileName, 0, originalFileName.Length);
+     }
+
+     private string DecryptHeaderFromStream(Stream input, string personalKey)
+     {
+          byte[] originalFileNameLength = new byte[4];
+          input.Read(originalFileNameLength, 0, 4);
+
+          byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
+          input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+          
+          return this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
+     }
+
+     private void EncryptBodyToStream(Stream input, Stream output, string personalKey)
      {
           byte[] salt = null;
           byte[] iv = null;
@@ -171,7 +178,7 @@ public class CryptographyProvider
           }
      }
 
-     private void DecryptToStreamWithPersonalKey(Stream input, Stream output, string personalKey)
+     private void DecryptBodyFromStream(Stream input, Stream output, string personalKey)
      {
           byte[] salt = new byte[CryptographyProvider.EncryptionKeySize / 8];
           byte[] iv = new byte[CryptographyProvider.EncryptionBlockSize / 8];

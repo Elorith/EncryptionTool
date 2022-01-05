@@ -138,7 +138,7 @@ public class Program
         ConsoleKey key;
         do
         {
-            var keyInfo = Console.ReadKey(true);
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
             key = keyInfo.Key;
 
             if (key == ConsoleKey.Backspace && input.Length > 0)
