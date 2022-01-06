@@ -92,15 +92,17 @@ public class EncryptionTool
         if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
         {
             CryptographyProvider cryptography = new CryptographyProvider();
-        
-            string outputDirectoryName = cryptography.EncryptStringWithPersonalKey(path, personalKey);
-            string rootOutputPath = Path.Combine(parent.FullName, outputDirectoryName);
-        
-            DirectoryInfo rootOutput = Directory.CreateDirectory(rootOutputPath);
+
+            DirectoryInfo directory = new DirectoryInfo(path);
+
+            string outputDirectoryName = cryptography.EncryptStringWithPersonalKey(directory.Name, personalKey);
+            string fullOutputPath = Path.Combine(parent.FullName, outputDirectoryName);
+
+            DirectoryInfo outputDirectory = Directory.CreateDirectory(fullOutputPath);
 
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                this.EncryptPathRecursive(subPath, personalKey, rootOutput, sanitisationType);
+                this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
             }
         }
         else
