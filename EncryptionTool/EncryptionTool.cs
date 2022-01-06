@@ -37,13 +37,6 @@ public class EncryptionTool
         }
         
         this.EncryptFile(path, personalKey);
-
-        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
-
-        this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
-
-        this.OnEncryptionProcessCompleted();
     }
 
     public void DoFileDecryption(string path)
@@ -56,16 +49,9 @@ public class EncryptionTool
         string personalKey = this.AskUserForPersonalKeyForDecryption(path);
         
         this.DecryptFile(path, personalKey);
-        
-        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
-        
-        File.Delete(path);
-
-        this.OnDecryptionProcessCompleted();
     }
     
-    public void DoSecureErase(string path, SanitisationAlgorithmType type, bool askForConfirmation = true)
+    public void DoSecureErase(string path, SanitisationAlgorithmType sanitisationType, bool askForConfirmation = true)
     {
         if (askForConfirmation)
         {
@@ -77,10 +63,10 @@ public class EncryptionTool
         }
 
         SecureEraser eraser = new SecureEraser();
-        eraser.ErasePath(path, type);
+        eraser.ErasePath(path, sanitisationType);
     }
 
-    private void EncryptFile(string path, string personalKey)
+    private void EncryptFile(string path, string personalKey, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
     {
         CryptographyProvider cryptography = new CryptographyProvider();
         string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, personalKey);
@@ -105,12 +91,26 @@ public class EncryptionTool
         }
         
         this.OnEncryptionVerificationProcessSuccess();
+        
+        GCHandle handle2 = this.AllocatePinnedGarbageCollectionHandle(personalKey);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle2, personalKey.Length * 2);
+
+        this.DoSecureErase(path, sanitisationType, false);
+        
+        this.OnEncryptionProcessCompleted();
     }
 
     private void DecryptFile(string path, string personalKey)
     {
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.DecryptFileToDiskWithPersonalKey(path, personalKey);
+        
+        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
+        
+        File.Delete(path);
+
+        this.OnDecryptionProcessCompleted();
     }
 
     private string AskUserForPersonalKeyForEncryption(string path)

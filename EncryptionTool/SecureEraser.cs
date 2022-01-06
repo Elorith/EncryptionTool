@@ -7,34 +7,34 @@ public class SecureEraser
     private byte[] buffer;
     private long currentBufferSize;
     
-    public void ErasePath(string path, SanitisationAlgorithmType type)
+    public void ErasePath(string path, SanitisationAlgorithmType sanitisationType)
     {
         FileAttributes attributes = File.GetAttributes(path);
         if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
         {
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                this.ErasePath(subPath, type);
+                this.ErasePath(subPath, sanitisationType);
             }
             Directory.Delete(path);
         }
         else
         {
-            this.EraseFile(path, type);
+            this.EraseFile(path, sanitisationType);
         }
     }
 
-    public void EraseFile(string path, SanitisationAlgorithmType type)
+    public void EraseFile(string path, SanitisationAlgorithmType sanitisationType)
     {
         Logger.Singleton.WriteLine("Starting secure erase of file at '" + path + "'.");
         
         using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096))
         {
-            if (type == SanitisationAlgorithmType.DoDFast)
+            if (sanitisationType == SanitisationAlgorithmType.DoDFast)
             {
                 this.EraseFast(stream);
             }
-            else if (type == SanitisationAlgorithmType.DoDSensitive)
+            else if (sanitisationType == SanitisationAlgorithmType.DoDSensitive)
             {
                 this.EraseSensitive(stream);
             }
