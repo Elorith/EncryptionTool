@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 
 public class EncryptionTool
 {
@@ -22,7 +23,7 @@ public class EncryptionTool
     public event OnAskUserToEnterPasswordForDecryptionCallback OnAskUserToEnterPasswordForDecryption;
     public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
     public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
-    
+
     public void DoFileEncryption(string path)
     {
         if (!File.Exists(path))
@@ -85,7 +86,7 @@ public class EncryptionTool
                 throw new CryptographicException("Encryption verification process failed");
             }
         }
-        catch (Exception ex)
+        catch
         {
             throw new CryptographicException("Encryption verification process failed");
         }

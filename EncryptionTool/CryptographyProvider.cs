@@ -68,14 +68,14 @@ public class CryptographyProvider
           return buffer;
      }
 
-     public byte[] EncryptStringWithPersonalKey(string original, string personalKey)
+     public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
      {
           byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
 
           return encrypted;
      }
 
-     public string DecryptStringWithPersonalKey(byte[] encrypted, string personalKey)
+     public string DecryptStringToBufferWithPersonalKey(byte[] encrypted, string personalKey)
      {
           string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
 
@@ -92,7 +92,7 @@ public class CryptographyProvider
 
           return hash;
      }
-
+     
      public string HashBufferToString(byte[] buffer)
      {
           string hash;
@@ -138,7 +138,7 @@ public class CryptographyProvider
 
      private void EncryptHeaderToStream(string header, Stream output, string personalKey)
      {
-          byte[] headerBytes = this.EncryptStringWithPersonalKey(header, personalKey);
+          byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header, personalKey);
           byte[] headerLengthBytes = BitConverter.GetBytes(headerBytes.Length);
 
           output.Write(headerLengthBytes, 0, 4);
@@ -153,7 +153,7 @@ public class CryptographyProvider
           byte[] headerBytes = new byte[BitConverter.ToInt32(headerLengthBytes, 0)];
           input.Read(headerBytes, 0, headerBytes.Length);
           
-          return this.DecryptStringWithPersonalKey(headerBytes, personalKey);
+          return this.DecryptStringToBufferWithPersonalKey(headerBytes, personalKey);
      }
 
      private void EncryptBodyToStream(Stream input, Stream output, string personalKey)
@@ -247,13 +247,7 @@ public class CryptographyProvider
                this.HashToStream(input, output, useUniqueCipherPermutation);
                byte[] buffer = output.ToArray();
 
-               StringBuilder builder = new StringBuilder();
-               for (int index = 0; index < buffer.Length; index++)
-               {
-                    byte value = buffer[index];
-                    builder.Append(value.ToString("x2"));  
-               }
-               hash = builder.ToString();
+               hash = this.BufferToHexadecimal(buffer);
           }
           return hash;
      }
@@ -302,6 +296,17 @@ public class CryptographyProvider
                permutation = pbkdf2.GetBytes(CryptographyProvider.EncryptionKeySize / 8);
           }
           return permutation;
+     }
+
+     private string BufferToHexadecimal(byte[] buffer)
+     {
+          StringBuilder builder = new StringBuilder();
+          for (int index = 0; index < buffer.Length; index++)
+          {
+               byte value = buffer[index];
+               builder.Append(value.ToString("x2"));  
+          }
+          return builder.ToString();
      }
      
      #endregion
