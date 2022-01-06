@@ -68,6 +68,22 @@ public class CryptographyProvider
           return buffer;
      }
 
+     public string EncryptStringWithPersonalKey(string original, string personalKey)
+     {
+          byte[] buffer = this.EncryptStringToBufferWithPersonalKey(original, personalKey);
+          string encrypted = this.BufferToHexadecimal(buffer);
+
+          return encrypted;
+     }
+     
+     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
+     {
+          byte[] buffer = this.HexadecimalToBuffer(encrypted);
+          string original = this.DecryptStringFromBufferWithPersonalKey(buffer, personalKey);
+
+          return original;
+     }
+     
      public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
      {
           byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
@@ -75,7 +91,7 @@ public class CryptographyProvider
           return encrypted;
      }
 
-     public string DecryptStringToBufferWithPersonalKey(byte[] encrypted, string personalKey)
+     public string DecryptStringFromBufferWithPersonalKey(byte[] encrypted, string personalKey)
      {
           string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
 
@@ -153,7 +169,7 @@ public class CryptographyProvider
           byte[] headerBytes = new byte[BitConverter.ToInt32(headerLengthBytes, 0)];
           input.Read(headerBytes, 0, headerBytes.Length);
           
-          return this.DecryptStringToBufferWithPersonalKey(headerBytes, personalKey);
+          return this.DecryptStringFromBufferWithPersonalKey(headerBytes, personalKey);
      }
 
      private void EncryptBodyToStream(Stream input, Stream output, string personalKey)
@@ -306,7 +322,21 @@ public class CryptographyProvider
                byte value = buffer[index];
                builder.Append(value.ToString("x2"));  
           }
+          
           return builder.ToString();
+     }
+     
+     private byte[] HexadecimalToBuffer(string hex)
+     {
+          int length = hex.Length;
+          
+          byte[] buffer = new byte[length / 2];
+          for (int index = 0; index < length; index += 2)
+          {
+               buffer[index / 2] = Convert.ToByte(hex.Substring(index, 2), 16);
+          }
+
+          return buffer;
      }
      
      #endregion
