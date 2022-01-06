@@ -10,6 +10,36 @@ public class CryptographyProvider
      private const ulong encryptionBufferSize = 1048576;
 
      #region Public API Functions
+     
+     public string EncryptStringWithPersonalKey(string original, string personalKey)
+     {
+          byte[] buffer = this.EncryptStringToBufferWithPersonalKey(original, personalKey);
+          string encrypted = this.BufferToHexadecimal(buffer);
+
+          return encrypted;
+     }
+     
+     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
+     {
+          byte[] buffer = this.HexadecimalToBuffer(encrypted);
+          string original = this.DecryptStringFromBufferWithPersonalKey(buffer, personalKey);
+
+          return original;
+     }
+     
+     public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
+     {
+          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
+
+          return encrypted;
+     }
+
+     public string DecryptStringFromBufferWithPersonalKey(byte[] encrypted, string personalKey)
+     {
+          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
+
+          return original;
+     }
 
      public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
@@ -66,36 +96,6 @@ public class CryptographyProvider
           }
 
           return buffer;
-     }
-
-     public string EncryptStringWithPersonalKey(string original, string personalKey)
-     {
-          byte[] buffer = this.EncryptStringToBufferWithPersonalKey(original, personalKey);
-          string encrypted = this.BufferToHexadecimal(buffer);
-
-          return encrypted;
-     }
-     
-     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
-     {
-          byte[] buffer = this.HexadecimalToBuffer(encrypted);
-          string original = this.DecryptStringFromBufferWithPersonalKey(buffer, personalKey);
-
-          return original;
-     }
-     
-     public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
-     {
-          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
-
-          return encrypted;
-     }
-
-     public string DecryptStringFromBufferWithPersonalKey(byte[] encrypted, string personalKey)
-     {
-          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
-
-          return original;
      }
 
      public string HashFileToString(string path)
