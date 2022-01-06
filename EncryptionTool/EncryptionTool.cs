@@ -57,11 +57,7 @@ public class EncryptionTool
             return;
         }
 
-        CryptographyProvider cryptography = new CryptographyProvider();
-        string encryptedDirectoryName = cryptography.EncryptStringWithPersonalKey(path, personalKey);
-        
-        string outputPath = Path.Combine(rootParent.FullName, encryptedDirectoryName);
-        Directory.CreateDirectory(outputPath);
+        this.EncryptPathRecursive(path, personalKey, rootParent);
     }
     
     public void DoFileDecryption(string path)
@@ -89,6 +85,28 @@ public class EncryptionTool
 
         SecureEraser eraser = new SecureEraser();
         eraser.ErasePath(path, sanitisationType);
+    }
+
+    private void EncryptPathRecursive(string path, string personalKey, DirectoryInfo parent, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
+    {
+        if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
+        {
+            CryptographyProvider cryptography = new CryptographyProvider();
+        
+            string outputDirectoryName = cryptography.EncryptStringWithPersonalKey(path, personalKey);
+            string rootOutputPath = Path.Combine(parent.FullName, outputDirectoryName);
+        
+            Directory.CreateDirectory(rootOutputPath);
+
+            foreach (string subPath in Directory.GetFileSystemEntries(path))
+            {
+                this.EncryptPathRecursive(subPath, personalKey, new DirectoryInfo(rootOutputPath), sanitisationType);
+            }
+        }
+        else
+        {
+            this.EncryptFile(path, personalKey, sanitisationType);
+        }
     }
 
     private void EncryptFile(string path, string personalKey, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
