@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 public class Program
 {
@@ -20,47 +22,41 @@ public class Program
 
         while (true)
         {
-            string command = Console.ReadLine();
-            if (command == null)
-            {
-                continue;
-            }
-            
-            string[] split = command.Split(new []{' '},2);
-            if (string.Equals(split[0], "encrypt", StringComparison.OrdinalIgnoreCase))
+            string[] command = this.ReadCommandFromConsoleLine(); 
+            if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
-                    application.DoFileEncryption(split[1].Trim('"'));
+                    application.DoFileEncryption(command[1].Trim('"'));
                 }
                 catch (Exception ex)
                 {
                     Logger.Singleton.WriteLine(ex.Message);
                 }
             }
-            else if (string.Equals(split[0], "decrypt", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
-                    application.DoFileDecryption(split[1].Trim('"'));
+                    application.DoFileDecryption(command[1].Trim('"'));
                 }
                 catch (Exception ex)
                 {
                     Logger.Singleton.WriteLine(ex.Message);
                 }
             }
-            else if (string.Equals(split[0], "erase", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
-                    application.DoSecureErase(split[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
+                    application.DoSecureErase(command[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
                 }
                 catch (Exception ex)
                 {
                     Logger.Singleton.WriteLine(ex.Message);
                 }
             }
-            else if (string.Equals(split[0], "exit", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
             {
                 break;
             }
@@ -131,6 +127,32 @@ public class Program
         return application;
     }
 
+    private string[] ReadCommandFromConsoleLine()
+    {
+        string input = Console.ReadLine();
+        if (input == null)
+        {
+            return null;
+        }
+        
+        List<string> command = new List<string>();
+
+        Regex splitter = new Regex(@"[\""].+?[\""]|[^ ]+", RegexOptions.Compiled);
+        foreach (Match match in splitter.Matches(input))
+        {
+            if (match.Value.Length == 0)
+            {
+                command.Add("");
+            }
+            else
+            {
+                command.Add(match.Value.TrimStart(','));
+            }
+        }
+
+        return command.ToArray();
+    }
+
     private string ReadPasswordFromConsoleLine()
     {
         string input = string.Empty;
@@ -153,7 +175,6 @@ public class Program
             }
         }
         while (key != ConsoleKey.Enter);
-
         Console.Write("\n");
         
         return input;
