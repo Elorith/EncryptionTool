@@ -9,7 +9,7 @@ public class EncryptionTool
     public delegate string OnAskUserToRepeatPasswordForEncryptionCallback(string path);
     public delegate void OnUserEnteredNonMatchingPasswordsCallback();
     public delegate void OnEncryptionVerificationProcessSuccessCallback();
-    public delegate void OnEncryptionAndSecureEraseProcessCompletedCallback();
+    public delegate void OnEncryptionProcessCompletedCallback();
     public delegate string OnAskUserToEnterPasswordForDecryptionCallback(string path);
     public delegate void OnDecryptionProcessCompletedCallback();
     public delegate bool OnAskUserForEraseConfirmationCallback(string path);
@@ -18,62 +18,34 @@ public class EncryptionTool
     public event OnAskUserToRepeatPasswordForEncryptionCallback OnAskUserToRepeatPasswordForEncryption;
     public event OnUserEnteredNonMatchingPasswordsCallback OnUserEnteredNonMatchingPasswords;
     public event OnEncryptionVerificationProcessSuccessCallback OnEncryptionVerificationProcessSuccess;
-    public event OnEncryptionAndSecureEraseProcessCompletedCallback OnEncryptionAndSecureEraseProcessCompleted;
+    public event OnEncryptionProcessCompletedCallback OnEncryptionProcessCompleted;
     public event OnAskUserToEnterPasswordForDecryptionCallback OnAskUserToEnterPasswordForDecryption;
     public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
     public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
-
+    
     public void DoFileEncryption(string path)
     {
         if (!File.Exists(path))
         {
             throw new ArgumentException("Specified path is not a file or does not exist");
         }
-        
-        string response = this.OnAskUserToEnterPasswordForEncryption(path);
-        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(response);
-        
-        string response2 = this.OnAskUserToRepeatPasswordForEncryption(path);
-        GCHandle handle2 = this.AllocatePinnedGarbageCollectionHandle(response2);
 
-        if (response != response2)
+        string personalKey = this.AskUserForPersonalKeyForEncryption(path);
+        if (personalKey == null)
         {
-            this.OnUserEnteredNonMatchingPasswords();
             return;
         }
         
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle2, response2.Length * 2);
+        this.EncryptFile(path, personalKey);
 
-        CryptographyProvider cryptography = new CryptographyProvider();
-        string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, response);
-        
-        try
-        {
-            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, response);
-            GCHandle handle3 = this.AllocatePinnedGarbageCollectionHandle(decrypted);
-            
-            string hash = cryptography.HashBufferToString(decrypted);
-            
-            this.SecurelyReleasePinnedGarbageCollectionHandle(handle3, decrypted.Length);
-
-            if (hash != Path.GetFileNameWithoutExtension(outputPath))
-            {
-                throw new CryptographicException("Encryption verification process failed");
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new CryptographicException("Encryption verification process failed");
-        }
-        this.OnEncryptionVerificationProcessSuccess();
-        
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, response.Length * 2);
+        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
 
         this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, false);
 
-        this.OnEncryptionAndSecureEraseProcessCompleted();
+        this.OnEncryptionProcessCompleted();
     }
-    
+
     public void DoFileDecryption(string path)
     {
         if (!File.Exists(path))
@@ -81,13 +53,12 @@ public class EncryptionTool
             throw new ArgumentException("Specified path is not a file or does not exist");
         }
 
-        string response = this.OnAskUserToEnterPasswordForDecryption(path);
-        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(response);
-
-        CryptographyProvider cryptography = new CryptographyProvider();
-        cryptography.DecryptFileToDiskWithPersonalKey(path, response);
+        string personalKey = this.AskUserForPersonalKeyForDecryption(path);
         
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, response.Length * 2);
+        this.DecryptFile(path, personalKey);
+        
+        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
         
         File.Delete(path);
 
@@ -108,7 +79,69 @@ public class EncryptionTool
         SecureEraser eraser = new SecureEraser();
         eraser.ErasePath(path, type);
     }
-    
+
+    private void EncryptFile(string path, string personalKey)
+    {
+        CryptographyProvider cryptography = new CryptographyProvider();
+        string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, personalKey);
+        
+        try
+        {
+            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
+
+            string hash = cryptography.HashBufferToString(decrypted);
+            
+            GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(decrypted);
+            this.SecurelyReleasePinnedGarbageCollectionHandle(handle, decrypted.Length);
+
+            if (hash != Path.GetFileNameWithoutExtension(outputPath))
+            {
+                throw new CryptographicException("Encryption verification process failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new CryptographicException("Encryption verification process failed");
+        }
+        
+        this.OnEncryptionVerificationProcessSuccess();
+    }
+
+    private void DecryptFile(string path, string personalKey)
+    {
+        CryptographyProvider cryptography = new CryptographyProvider();
+        cryptography.DecryptFileToDiskWithPersonalKey(path, personalKey);
+    }
+
+    private string AskUserForPersonalKeyForEncryption(string path)
+    {
+        string response = this.OnAskUserToEnterPasswordForEncryption(path);
+        string response2 = this.OnAskUserToRepeatPasswordForEncryption(path);
+
+        string personalKey = null;
+        if (response != response2)
+        {
+            GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(response);
+            this.SecurelyReleasePinnedGarbageCollectionHandle(handle, response.Length * 2);
+            
+            this.OnUserEnteredNonMatchingPasswords();
+        }
+        else
+        {
+            personalKey = response;
+        }
+        
+        GCHandle handle2 = this.AllocatePinnedGarbageCollectionHandle(response2);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle2, response2.Length * 2);
+
+        return personalKey;
+    }
+
+    private string AskUserForPersonalKeyForDecryption(string path)
+    {
+        return this.OnAskUserToEnterPasswordForDecryption(path);
+    }
+
     [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
     private static extern bool ZeroMemory(IntPtr destination, int length);
 

@@ -23,6 +23,7 @@ public class Program
         while (true)
         {
             string[] command = this.ReadCommandFromConsoleLine();
+            
             if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
             {
                 break;
@@ -94,7 +95,7 @@ public class Program
             Logger.Singleton.WriteLine("Encryption verification process successful.");
         });
         
-        application.OnEncryptionAndSecureEraseProcessCompleted += new EncryptionTool.OnEncryptionAndSecureEraseProcessCompletedCallback(() =>
+        application.OnEncryptionProcessCompleted += new EncryptionTool.OnEncryptionProcessCompletedCallback(() =>
         {
             Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
         });
