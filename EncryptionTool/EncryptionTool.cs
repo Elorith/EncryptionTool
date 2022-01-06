@@ -96,16 +96,19 @@ public class EncryptionTool
             string outputDirectoryName = cryptography.EncryptStringWithPersonalKey(path, personalKey);
             string rootOutputPath = Path.Combine(parent.FullName, outputDirectoryName);
         
-            Directory.CreateDirectory(rootOutputPath);
+            DirectoryInfo rootOutput = Directory.CreateDirectory(rootOutputPath);
 
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                this.EncryptPathRecursive(subPath, personalKey, new DirectoryInfo(rootOutputPath), sanitisationType);
+                this.EncryptPathRecursive(subPath, personalKey, rootOutput, sanitisationType);
             }
         }
         else
         {
-            this.EncryptFile(path, personalKey, sanitisationType);
+            string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
+            File.Move(path, newPath);
+            
+            this.EncryptFile(newPath, personalKey, sanitisationType);
         }
     }
 
