@@ -22,47 +22,34 @@ public class Program
 
         while (true)
         {
-            string[] command = this.ReadCommandFromConsoleLine(); 
-            if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    application.DoFileEncryption(command[1].Trim('"'));
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    application.DoFileDecryption(command[1].Trim('"'));
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    application.DoSecureErase(command[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
+            string[] command = this.ReadCommandFromConsoleLine();
+            if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
             {
                 break;
             }
-            else
+            
+            try
             {
-                Logger.Singleton.WriteLine("Specified command was not recognised.");
+                if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
+                {
+                    application.DoFileEncryption(command[1].Trim('"'));
+                }
+                else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
+                {
+                    application.DoFileDecryption(command[1].Trim('"'));
+                }
+                else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
+                {
+                    application.DoSecureErase(command[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
+                }
+                else
+                {
+                    Logger.Singleton.WriteLine("Specified command was not recognised.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton.WriteLine(ex.Message);
             }
         }
     }
