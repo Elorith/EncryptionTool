@@ -40,6 +40,31 @@ public class EncryptionTool
         this.EncryptFile(path, personalKey);
     }
 
+    public void DoDirectoryEncryption(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            throw new ArgumentException("Specified path is not a directory or does not exist");
+        }
+        DirectoryInfo rootParent = Directory.GetParent(path);
+        if (rootParent == null)
+        {
+            throw new ArgumentException("Specified path has no parent");
+        }
+        
+        string personalKey = this.AskUserForPersonalKeyForEncryption(path);
+        if (personalKey == null)
+        {
+            return;
+        }
+
+        CryptographyProvider cryptography = new CryptographyProvider();
+        string encryptedDirectoryName = cryptography.EncryptStringWithPersonalKey(path, personalKey);
+        
+        string outputPath = Path.Combine(rootParent.FullName, encryptedDirectoryName);
+        Directory.CreateDirectory(outputPath);
+    }
+    
     public void DoFileDecryption(string path)
     {
         if (!File.Exists(path))
