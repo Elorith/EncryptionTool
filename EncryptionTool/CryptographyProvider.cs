@@ -80,6 +80,21 @@ public class CryptographyProvider
           Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
           return outputPath;
      }
+     
+     public byte[] EncryptFileToMemoryWithPersonalKey(string path, string personalKey)
+     {
+          byte[] buffer;
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.EncryptBodyToStream(input, output, personalKey);
+                    buffer = output.ToArray();
+               }
+          }
+          
+          return buffer;
+     }
 
      public byte[] DecryptFileToMemoryWithPersonalKey(string path, string personalKey)
      {
