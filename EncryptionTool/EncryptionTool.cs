@@ -100,6 +100,8 @@ public class EncryptionTool
             {
                 this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
             }
+            
+            Directory.Delete(path);
         }
         else
         {
