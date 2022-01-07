@@ -41,14 +41,14 @@ public class CryptographyProvider
           return original;
      }
      
-     public string EncryptDirectoryToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
+     public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
-          string encryptedDirectoryName = this.HashStringToString(path);
-          
+          DirectoryInfo currentDirectory = new DirectoryInfo(path);
+          string directoryNameSalt = Environment.MachineName; 
+          string encryptedDirectoryName = this.HashStringToString(directoryNameSalt + currentDirectory.Name);
+
           string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
           Directory.CreateDirectory(directoryOutputPath);
-
-          DirectoryInfo currentDirectory = new DirectoryInfo(path);
 
           string headerOutputPath = Path.Combine(directoryOutputPath, "_" + encryptedDirectoryName + ".aes");
           using (FileStream output = new FileStream(headerOutputPath, FileMode.Create))

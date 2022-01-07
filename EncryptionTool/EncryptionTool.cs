@@ -92,7 +92,7 @@ public class EncryptionTool
         if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
         {
             CryptographyProvider cryptography = new CryptographyProvider();
-            string outputPath = cryptography.EncryptDirectoryToDiskWithPersonalKey(path, personalKey, parent);
+            string outputPath = cryptography.EncryptDirectoryRootToDiskWithPersonalKey(path, personalKey, parent);
             
             DirectoryInfo outputDirectory = new DirectoryInfo(outputPath);
 

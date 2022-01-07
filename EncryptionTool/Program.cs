@@ -19,8 +19,6 @@ public class Program
         Console.Title = "Encryption Tool";
 
         EncryptionTool application = this.CreateCommandLineInterfaceTool();
-        
-        application.DoDirectoryEncryption(Console.ReadLine());
 
         while (true)
         {
