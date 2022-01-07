@@ -40,16 +40,34 @@ public class CryptographyProvider
 
           return original;
      }
+     
+     public string EncryptDirectoryToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
+     {
+          string encryptedDirectoryName = this.HashStringToString(path);
+          
+          string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
+          Directory.CreateDirectory(directoryOutputPath);
+
+          DirectoryInfo currentDirectory = new DirectoryInfo(path);
+
+          string headerOutputPath = Path.Combine(directoryOutputPath, "_" + encryptedDirectoryName + ".aes");
+          using (FileStream output = new FileStream(headerOutputPath, FileMode.Create))
+          {
+               string originalDirectoryName = currentDirectory.Name;
+               this.EncryptHeaderToStream(originalDirectoryName, output, personalKey);
+          }   
+
+          return directoryOutputPath;
+     }
 
      public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
-          string outputPath;
+          string encryptedFileName = this.HashFileToString(path) + ".aes";
+          string directoryName = Path.GetDirectoryName(path);
+          
+          string outputPath = Path.Combine(directoryName, encryptedFileName);
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string encryptedFileName = this.HashFileToString(path) + ".aes";
-               string directoryName = Path.GetDirectoryName(path);
-
-               outputPath = Path.Combine(directoryName, encryptedFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     string originalFileName = Path.GetFileName(path);
@@ -120,6 +138,13 @@ public class CryptographyProvider
           { 
                hash = this.HashToString(input, false);
           }
+
+          return hash;
+     }
+
+     public string HashStringToString(string original)
+     {
+          string hash = this.HashBufferToString(Encoding.UTF8.GetBytes(original));
 
           return hash;
      }
@@ -223,7 +248,7 @@ public class CryptographyProvider
                aes.BlockSize = CryptographyProvider.EncryptionBlockSize;
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
-               
+
                aes.Key = this.RecalculateCipherPermutation(personalKey, ref salt, ref iv);
                aes.IV = iv;
                
@@ -297,7 +322,7 @@ public class CryptographyProvider
                permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
                // TODO: Figure out how to implement this.    
           }
-          using (SHA256 sha = SHA256.Create())
+          using (HashAlgorithm sha = SHA256.Create())
           {
                byte[] hash = sha.ComputeHash(input);
                output.Write(hash, 0, hash.Length);
