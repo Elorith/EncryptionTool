@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -44,8 +45,8 @@ public class CryptographyProvider
      public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
           DirectoryInfo currentDirectory = new DirectoryInfo(path);
-          string directoryNameSalt = Environment.MachineName; 
-          string encryptedDirectoryName = this.HashStringToString(directoryNameSalt + currentDirectory.Name);
+          string directoryNameSalt = Environment.MachineName + "_"; 
+          string encryptedDirectoryName = this.HashStringToString(directoryNameSalt + currentDirectory.Name, HashAlgorithmType.Sha256);
 
           string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
           Directory.CreateDirectory(directoryOutputPath);
@@ -62,7 +63,7 @@ public class CryptographyProvider
 
      public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
-          string encryptedFileName = this.HashFileToString(path) + ".aes";
+          string encryptedFileName = this.HashFileToString(path, HashAlgorithmType.Sha256) + ".aes";
           string directoryName = Path.GetDirectoryName(path);
           
           string outputPath = Path.Combine(directoryName, encryptedFileName);
@@ -131,30 +132,30 @@ public class CryptographyProvider
           return buffer;
      }
 
-     public string HashFileToString(string path)
+     public string HashFileToString(string path, HashAlgorithmType algorithmType)
      {
           string hash;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           { 
-               hash = this.HashToString(input, false);
+               hash = this.HashToString(input, false, algorithmType);
           }
 
           return hash;
      }
 
-     public string HashStringToString(string original)
+     public string HashStringToString(string original, HashAlgorithmType algorithmType)
      {
-          string hash = this.HashBufferToString(Encoding.UTF8.GetBytes(original));
+          string hash = this.HashBufferToString(Encoding.UTF8.GetBytes(original), algorithmType);
 
           return hash;
      }
      
-     public string HashBufferToString(byte[] buffer)
+     public string HashBufferToString(byte[] buffer, HashAlgorithmType algorithmType)
      {
           string hash;
           using (MemoryStream stream = new MemoryStream(buffer))
           { 
-               hash = this.HashToString(stream, false);
+               hash = this.HashToString(stream, false, algorithmType);
           }
 
           return hash;
@@ -295,12 +296,12 @@ public class CryptographyProvider
      
      #region Internal Hashing Functions
 
-     private string HashToString(Stream input, bool useUniqueCipherPermutation)
+     private string HashToString(Stream input, bool useUniqueCipherPermutation, HashAlgorithmType algorithmType)
      {
           string hash;
           using (MemoryStream output = new MemoryStream())
           {
-               this.HashToStream(input, output, useUniqueCipherPermutation);
+               this.HashToStream(input, output, useUniqueCipherPermutation, algorithmType);
                byte[] buffer = output.ToArray();
 
                hash = this.BufferToHexadecimal(buffer);
@@ -308,7 +309,7 @@ public class CryptographyProvider
           return hash;
      }
 
-     private void HashToStream(Stream input, Stream output, bool useUniqueCipherPermutation)
+     private void HashToStream(Stream input, Stream output, bool useUniqueCipherPermutation, HashAlgorithmType algorithmType)
      {
           byte[] permutation;
           if (useUniqueCipherPermutation)
@@ -322,13 +323,19 @@ public class CryptographyProvider
                permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
                // TODO: Figure out how to implement this.    
           }
-          using (HashAlgorithm sha = SHA256.Create())
+          // new Rfc2898DeriveBytes()
+          using (HashAlgorithm sha = HashAlgorithm.Create(algorithmType.ToString().ToUpper()))
           {
+               if (sha == null)
+               {
+                    throw new ArgumentException("Specified hash algorithm type is invalid");
+               }
+               
                byte[] hash = sha.ComputeHash(input);
                output.Write(hash, 0, hash.Length);
           }
      }
-     
+
      #endregion
      
      #region Miscellaneous Internal Functions

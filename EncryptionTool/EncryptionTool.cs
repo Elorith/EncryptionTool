@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 
 public class EncryptionTool
@@ -121,7 +122,7 @@ public class EncryptionTool
         {
             byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
 
-            string hash = cryptography.HashBufferToString(decrypted);
+            string hash = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Sha256);
             
             GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(decrypted);
             this.SecurelyReleasePinnedGarbageCollectionHandle(handle, decrypted.Length);
