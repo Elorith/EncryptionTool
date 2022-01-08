@@ -97,8 +97,7 @@ public class CryptographyProvider
                     this.EncryptBodyToStream(input, output, personalKey);
                }
           }
-
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted to disk.");
+          
           return outputPath;
      }
 
@@ -115,8 +114,7 @@ public class CryptographyProvider
                     this.DecryptBodyFromStream(input, output, personalKey);
                }
           }
-
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
+          
           return outputPath;
      }
      

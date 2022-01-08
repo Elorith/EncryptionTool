@@ -112,13 +112,15 @@ public class EncryptionTool
             CryptographyProvider cryptography = new CryptographyProvider();
             string outputPath = cryptography.EncryptDirectoryRootToDiskWithPersonalKey(path, personalKey, parent);
             
+            Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted to disk.");
+            
             DirectoryInfo outputDirectory = new DirectoryInfo(outputPath);
 
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
                 this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
             }
-            
+
             Directory.Delete(path);
         }
         else
@@ -137,13 +139,15 @@ public class EncryptionTool
             CryptographyProvider cryptography = new CryptographyProvider();
             string outputPath = cryptography.DecryptDirectoryRootToDiskWithPersonalKey(path, personalKey, parent);
             
+            Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
+            
             DirectoryInfo outputDirectory = new DirectoryInfo(outputPath);
             
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
                 this.DecryptPathRecursive(subPath, personalKey, outputDirectory);
             }
-            
+
             Directory.Delete(path);
         }
         else
@@ -159,6 +163,8 @@ public class EncryptionTool
     {
         CryptographyProvider cryptography = new CryptographyProvider();
         string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, personalKey);
+        
+        Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted to disk.");
         
         try
         {
@@ -193,6 +199,8 @@ public class EncryptionTool
     {
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.DecryptFileToDiskWithPersonalKey(path, personalKey);
+        
+        Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
         
         GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
         this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
