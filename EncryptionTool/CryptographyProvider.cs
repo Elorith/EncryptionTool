@@ -47,7 +47,7 @@ public class CryptographyProvider
      public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
           DirectoryInfo currentDirectory = new DirectoryInfo(path);
-          string encryptedDirectoryName = this.HashStringToString(currentDirectory.Name, HashAlgorithmType.Sha256, true);
+          string encryptedDirectoryName = this.HashStringToString(currentDirectory.Name, HashAlgorithmType.Md5, true);
 
           string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
           Directory.CreateDirectory(directoryOutputPath);
@@ -312,7 +312,7 @@ public class CryptographyProvider
                this.HashToStreamPbkdf2(buffer, output, algorithmType);
                byte[] result = output.ToArray();
 
-               hash = this.BufferToHexadecimal(buffer);
+               hash = this.BufferToHexadecimal(result);
           }
           
           return hash;
