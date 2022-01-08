@@ -113,6 +113,31 @@ public class EncryptionTool
         }
     }
 
+    private void DecryptPathRecursive(string path, string personalKey, DirectoryInfo parent)
+    {
+        if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
+        {
+            CryptographyProvider cryptography = new CryptographyProvider();
+            string outputPath = cryptography.DecryptDirectoryRootToDiskWithPersonalKey(path, personalKey, parent);
+            
+            DirectoryInfo outputDirectory = new DirectoryInfo(outputPath);
+
+            foreach (string subPath in Directory.GetFileSystemEntries(path))
+            {
+                this.DecryptPathRecursive(subPath, personalKey, outputDirectory);
+            }
+            
+            Directory.Delete(path);
+        }
+        else
+        {
+            string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
+            File.Move(path, newPath);
+            
+            this.DecryptFile(newPath, personalKey);
+        }
+    }
+
     private void EncryptFile(string path, string personalKey, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
     {
         CryptographyProvider cryptography = new CryptographyProvider();
@@ -132,7 +157,7 @@ public class EncryptionTool
                 throw new CryptographicException("Encryption verification process failed");
             }
         }
-        catch
+        catch (CryptographicException ex)
         {
             throw new CryptographicException("Encryption verification process failed");
         }
