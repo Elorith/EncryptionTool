@@ -66,7 +66,7 @@ public class CryptographyProvider
 
      public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
-          string encryptedFileName = this.HashFileToString(path, HashAlgorithmType.Sha256) + ".aes";
+          string encryptedFileName = this.HashFileToString(path, HashAlgorithmType.Md5) + ".aes";
           string directoryName = Path.GetDirectoryName(path);
           
           string outputPath = Path.Combine(directoryName, encryptedFileName);

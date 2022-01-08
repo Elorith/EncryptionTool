@@ -122,7 +122,7 @@ public class EncryptionTool
         {
             byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
 
-            string hash = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Sha256, false);
+            string hash = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
             
             GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(decrypted);
             this.SecurelyReleasePinnedGarbageCollectionHandle(handle, decrypted.Length);
