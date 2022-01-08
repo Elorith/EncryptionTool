@@ -6,13 +6,13 @@ using System.Text;
 
 public class CryptographyProvider
 {
+     public static readonly string NonDynamicHashSalt = "b6b69e1f7d57426d_" + Environment.MachineName + "_";
+     
      public const int EncryptionKeySize = 256;
      public const int EncryptionBlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
      
      public const int Pbkdf2Iterations = 10000;
-     
-     public static readonly string NonDynamicHashSalt = "b6b69e1f7d57426d_" + Environment.MachineName + "_";
 
      #region Public API Functions
      
@@ -138,9 +138,17 @@ public class CryptographyProvider
      public string HashFileToString(string path, HashAlgorithmType algorithmType)
      {
           string hash;
-          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-          { 
-               hash = this.HashToStringSha(input, algorithmType);
+          using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
+               using (MemoryStream input = new MemoryStream())
+               {
+                    byte[] salt = Encoding.UTF8.GetBytes(CryptographyProvider.NonDynamicHashSalt);
+                    input.Write(salt, 0, salt.Length);
+                    
+                    file.CopyTo(input);
+                    
+                    hash = this.HashToStringSha(input, algorithmType);
+               }
           }
 
           return hash;
@@ -158,13 +166,20 @@ public class CryptographyProvider
           string hash;
           if (usePbkdf2)
           {
-               hash = this.HashToStringPbkdf2(buffer, algorithmType);
+               byte[] salt = Encoding.UTF8.GetBytes(CryptographyProvider.NonDynamicHashSalt);
+               
+               hash = this.HashToStringPbkdf2(buffer, salt, algorithmType);
           }
           else
           {
-               using (MemoryStream stream = new MemoryStream(buffer))
-               { 
-                    hash = this.HashToStringSha(stream, algorithmType);
+               using (MemoryStream input = new MemoryStream())
+               {
+                    byte[] salt = Encoding.UTF8.GetBytes(CryptographyProvider.NonDynamicHashSalt);
+                    input.Write(salt, 0, salt.Length);
+                    
+                    input.Write(buffer, 0, buffer.Length);
+                    
+                    hash = this.HashToStringSha(input, algorithmType);
                }     
           }
 
@@ -306,12 +321,12 @@ public class CryptographyProvider
      
      #region Internal Hashing Functions
 
-     private string HashToStringPbkdf2(byte[] buffer, HashAlgorithmType algorithmType)
+     private string HashToStringPbkdf2(byte[] buffer, byte[] salt, HashAlgorithmType algorithmType)
      {
           string hash;
           using (MemoryStream output = new MemoryStream())
           {
-               this.HashToStreamPbkdf2(buffer, output, algorithmType);
+               this.HashToStreamPbkdf2(buffer, salt, output, algorithmType);
                byte[] result = output.ToArray();
 
                hash = this.BufferToHexadecimal(result);
@@ -320,9 +335,8 @@ public class CryptographyProvider
           return hash;
      }
      
-     private void HashToStreamPbkdf2(byte[] buffer, Stream output, HashAlgorithmType algorithmType)
+     private void HashToStreamPbkdf2(byte[] buffer, byte[] salt, Stream output, HashAlgorithmType algorithmType)
      {
-          byte[] salt = Encoding.UTF8.GetBytes(NonDynamicHashSalt);
           HashAlgorithmName algorithm = new HashAlgorithmName(algorithmType.ToString().ToUpper());
 
           byte[] hash;
@@ -358,7 +372,8 @@ public class CryptographyProvider
                {
                     throw new ArgumentException("Specified hash algorithm type is invalid");
                }
-                    
+
+               input.Position = 0;
                hash = sha.ComputeHash(input);
           }
           
