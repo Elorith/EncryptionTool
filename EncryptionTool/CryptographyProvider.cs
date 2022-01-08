@@ -9,7 +9,9 @@ public class CryptographyProvider
      public const int EncryptionKeySize = 256;
      public const int EncryptionBlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
-
+     
+     public const int Pbkdf2Iterations = 10000;
+     
      #region Public API Functions
      
      public string EncryptStringWithPersonalKey(string original, string personalKey)
@@ -45,8 +47,7 @@ public class CryptographyProvider
      public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
           DirectoryInfo currentDirectory = new DirectoryInfo(path);
-          string directoryNameSalt = Environment.MachineName + "_"; 
-          string encryptedDirectoryName = this.HashStringToString(directoryNameSalt + currentDirectory.Name, HashAlgorithmType.Sha256);
+          string encryptedDirectoryName = this.HashStringToString(currentDirectory.Name, HashAlgorithmType.Sha256, false);
 
           string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
           Directory.CreateDirectory(directoryOutputPath);
@@ -137,25 +138,32 @@ public class CryptographyProvider
           string hash;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           { 
-               hash = this.HashToString(input, false, algorithmType);
+               hash = this.HashToStringSha(input, algorithmType);
           }
 
           return hash;
      }
 
-     public string HashStringToString(string original, HashAlgorithmType algorithmType)
+     public string HashStringToString(string original, HashAlgorithmType algorithmType, bool usePbkdf2)
      {
-          string hash = this.HashBufferToString(Encoding.UTF8.GetBytes(original), algorithmType);
+          string hash = this.HashBufferToString(Encoding.UTF8.GetBytes(original), algorithmType, usePbkdf2);
 
           return hash;
      }
      
-     public string HashBufferToString(byte[] buffer, HashAlgorithmType algorithmType)
+     public string HashBufferToString(byte[] buffer, HashAlgorithmType algorithmType, bool usePbkdf2)
      {
           string hash;
-          using (MemoryStream stream = new MemoryStream(buffer))
-          { 
-               hash = this.HashToString(stream, false, algorithmType);
+          if (usePbkdf2)
+          {
+               hash = this.HashToStringPbkdf2(buffer, algorithmType);
+          }
+          else
+          {
+               using (MemoryStream stream = new MemoryStream(buffer))
+               { 
+                    hash = this.HashToStringSha(stream, algorithmType);
+               }     
           }
 
           return hash;
@@ -296,44 +304,62 @@ public class CryptographyProvider
      
      #region Internal Hashing Functions
 
-     private string HashToString(Stream input, bool useUniqueCipherPermutation, HashAlgorithmType algorithmType)
+     private string HashToStringPbkdf2(byte[] buffer, HashAlgorithmType algorithmType)
      {
           string hash;
           using (MemoryStream output = new MemoryStream())
           {
-               this.HashToStream(input, output, useUniqueCipherPermutation, algorithmType);
+               this.HashToStreamPbkdf2(buffer, output, algorithmType);
+               byte[] result = output.ToArray();
+
+               hash = this.BufferToHexadecimal(buffer);
+          }
+          
+          return hash;
+     }
+     
+     private void HashToStreamPbkdf2(byte[] buffer, Stream output, HashAlgorithmType algorithmType)
+     {
+          byte[] salt = Encoding.UTF8.GetBytes(Environment.MachineName + "_");
+          HashAlgorithmName algorithm = new HashAlgorithmName(algorithmType.ToString().ToUpper());
+
+          byte[] hash;
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(buffer, salt, CryptographyProvider.Pbkdf2Iterations, algorithm))
+          {
+               hash = pbkdf2.GetBytes(32);
+          }
+          
+          output.Write(hash, 0, hash.Length);
+     }
+
+     private string HashToStringSha(Stream input, HashAlgorithmType algorithmType)
+     {
+          string hash;
+          using (MemoryStream output = new MemoryStream())
+          {
+               this.HashToStreamSha(input, output, algorithmType);
                byte[] buffer = output.ToArray();
 
                hash = this.BufferToHexadecimal(buffer);
           }
+          
           return hash;
      }
 
-     private void HashToStream(Stream input, Stream output, bool useUniqueCipherPermutation, HashAlgorithmType algorithmType)
+     private void HashToStreamSha(Stream input, Stream output, HashAlgorithmType algorithmType)
      {
-          byte[] permutation;
-          if (useUniqueCipherPermutation)
-          {
-               /*byte[] unique = new byte[16];
-               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-               {
-                    rng.GetBytes(unique);
-               }
-    
-               permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
-               // TODO: Figure out how to implement this.    
-          }
-          // new Rfc2898DeriveBytes()
+          byte[] hash;
           using (HashAlgorithm sha = HashAlgorithm.Create(algorithmType.ToString().ToUpper()))
           {
                if (sha == null)
                {
                     throw new ArgumentException("Specified hash algorithm type is invalid");
                }
-               
-               byte[] hash = sha.ComputeHash(input);
-               output.Write(hash, 0, hash.Length);
+                    
+               hash = sha.ComputeHash(input);
           }
+          
+          output.Write(hash, 0, hash.Length);
      }
 
      #endregion
@@ -354,7 +380,7 @@ public class CryptographyProvider
                     rng.GetBytes(iv);
                }
           }
-          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(unique, salt, 10000))
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(unique, salt, CryptographyProvider.Pbkdf2Iterations))
           {
                permutation = pbkdf2.GetBytes(CryptographyProvider.EncryptionKeySize / 8);
           }
