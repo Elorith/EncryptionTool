@@ -12,7 +12,7 @@ public class CryptographyProvider
      
      public const int Pbkdf2Iterations = 10000;
      
-     public static readonly string Pbkdf2NonRandomSalt = Environment.MachineName + "_";
+     public static readonly string NonDynamicHashSalt = "b6b69e1f7d57426d_" + Environment.MachineName + "_";
 
      #region Public API Functions
      
@@ -322,7 +322,7 @@ public class CryptographyProvider
      
      private void HashToStreamPbkdf2(byte[] buffer, Stream output, HashAlgorithmType algorithmType)
      {
-          byte[] salt = Encoding.UTF8.GetBytes(Pbkdf2NonRandomSalt);
+          byte[] salt = Encoding.UTF8.GetBytes(NonDynamicHashSalt);
           HashAlgorithmName algorithm = new HashAlgorithmName(algorithmType.ToString().ToUpper());
 
           byte[] hash;
