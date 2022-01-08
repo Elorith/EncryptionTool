@@ -11,7 +11,7 @@ public class CryptographyProvider
      private const ulong encryptionBufferSize = 1048576;
      
      public const int Pbkdf2Iterations = 10000;
-     
+
      #region Public API Functions
      
      public string EncryptStringWithPersonalKey(string original, string personalKey)
@@ -47,7 +47,7 @@ public class CryptographyProvider
      public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
           DirectoryInfo currentDirectory = new DirectoryInfo(path);
-          string encryptedDirectoryName = this.HashStringToString(currentDirectory.Name, HashAlgorithmType.Sha256, false);
+          string encryptedDirectoryName = this.HashStringToString(currentDirectory.Name, HashAlgorithmType.Sha256, true);
 
           string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
           Directory.CreateDirectory(directoryOutputPath);
@@ -324,9 +324,10 @@ public class CryptographyProvider
           HashAlgorithmName algorithm = new HashAlgorithmName(algorithmType.ToString().ToUpper());
 
           byte[] hash;
+          int length = this.GetHashAlgorithmTypeLength(algorithmType);
           using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(buffer, salt, CryptographyProvider.Pbkdf2Iterations, algorithm))
           {
-               hash = pbkdf2.GetBytes(32);
+               hash = pbkdf2.GetBytes(length);
           }
           
           output.Write(hash, 0, hash.Length);
@@ -410,6 +411,32 @@ public class CryptographyProvider
           }
 
           return buffer;
+     }
+
+     private int GetHashAlgorithmTypeLength(HashAlgorithmType algorithmType)
+     {
+          if (algorithmType == HashAlgorithmType.Md5)
+          {
+               return 128 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha1)
+          {
+               return 160 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha256)
+          {
+               return 256 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha384)
+          {
+               return 384 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha512)
+          {
+               return 512 / 8;
+          }
+
+          throw new ArgumentException("Specified hash algorithm type is invalid");
      }
      
      #endregion
