@@ -73,6 +73,23 @@ public class EncryptionTool
         this.DecryptFile(path, personalKey);
     }
     
+    public void DoDirectoryDecryption(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            throw new ArgumentException("Specified path is not a directory or does not exist");
+        }
+        DirectoryInfo rootParent = Directory.GetParent(path);
+        if (rootParent == null)
+        {
+            throw new ArgumentException("Specified path has no parent");
+        }
+        
+        string personalKey = this.AskUserForPersonalKeyForDecryption(path);
+
+        this.DecryptPathRecursive(path, personalKey, rootParent);
+    }
+    
     public void DoSecureErase(string path, SanitisationAlgorithmType sanitisationType, bool askForConfirmation = true)
     {
         if (askForConfirmation)
@@ -121,7 +138,7 @@ public class EncryptionTool
             string outputPath = cryptography.DecryptDirectoryRootToDiskWithPersonalKey(path, personalKey, parent);
             
             DirectoryInfo outputDirectory = new DirectoryInfo(outputPath);
-
+            
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
                 this.DecryptPathRecursive(subPath, personalKey, outputDirectory);

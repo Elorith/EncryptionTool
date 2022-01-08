@@ -64,6 +64,23 @@ public class CryptographyProvider
           return directoryOutputPath;
      }
 
+     public string DecryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
+     {
+          DirectoryInfo currentDirectory = new DirectoryInfo(path);
+          string headerOutputPath = Path.Combine(path, "_" + currentDirectory.Name + ".aes");
+
+          string outputPath;
+          using (FileStream input = new FileStream(headerOutputPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
+               string originalDirectoryName = this.DecryptHeaderFromStream(input, personalKey);
+
+               outputPath = Path.Combine(parent.FullName, originalDirectoryName);
+               Directory.CreateDirectory(outputPath);
+          }
+
+          return outputPath;
+     }
+
      public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
      {
           string encryptedFileName = this.HashFileToString(path, HashAlgorithmType.Md5) + ".aes";
