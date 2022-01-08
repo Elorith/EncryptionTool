@@ -11,6 +11,8 @@ public class CryptographyProvider
      private const ulong encryptionBufferSize = 1048576;
      
      public const int Pbkdf2Iterations = 10000;
+     
+     public static readonly string Pbkdf2NonRandomSalt = Environment.MachineName + "_";
 
      #region Public API Functions
      
@@ -320,7 +322,7 @@ public class CryptographyProvider
      
      private void HashToStreamPbkdf2(byte[] buffer, Stream output, HashAlgorithmType algorithmType)
      {
-          byte[] salt = Encoding.UTF8.GetBytes(Environment.MachineName + "_");
+          byte[] salt = Encoding.UTF8.GetBytes(Pbkdf2NonRandomSalt);
           HashAlgorithmName algorithm = new HashAlgorithmName(algorithmType.ToString().ToUpper());
 
           byte[] hash;
