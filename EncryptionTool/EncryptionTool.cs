@@ -118,17 +118,17 @@ public class EncryptionTool
 
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
-                File.Move(path, newPath);
-                
-                this.EncryptPathRecursive(newPath, personalKey, outputDirectory, sanitisationType);
+                this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
             }
 
             Directory.Delete(path);
         }
         else
         {
-            this.EncryptFile(path, personalKey, sanitisationType);
+            string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
+            File.Move(path, newPath);
+
+            this.EncryptFile(newPath, personalKey, sanitisationType);
         }
     }
 
@@ -150,17 +150,17 @@ public class EncryptionTool
             
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
-                File.Move(path, newPath);
-                
-                this.DecryptPathRecursive(newPath, personalKey, outputDirectory);
+                this.DecryptPathRecursive(subPath, personalKey, outputDirectory);
             }
 
             Directory.Delete(path);
         }
         else
         {
-            this.DecryptFile(path, personalKey);
+            string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
+            File.Move(path, newPath);
+
+            this.DecryptFile(newPath, personalKey);
         }
     }
 
