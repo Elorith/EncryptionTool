@@ -7,7 +7,7 @@ public class ConsoleLineApplication
 {
     private EncryptionTool tool;
     
-    public EncryptionTool CreateCommandLineInterfaceTool()
+    public EncryptionTool CreateConsoleLineInterfaceTool()
     {
         this.tool = new EncryptionTool();
 
@@ -67,7 +67,7 @@ public class ConsoleLineApplication
         return this.tool;
     }
     
-    public void RunCommandLineInterfaceTool(out bool exitFlag)
+    public void RunConsoleLineInterfaceTool(out bool exitFlag)
     {
         string[] command = this.ReadCommandFromConsoleLine();
             

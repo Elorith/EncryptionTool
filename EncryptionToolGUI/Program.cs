@@ -12,10 +12,8 @@ public class Program
     // GUI implementation of the encryption tool.
     public void RunGraphicalUserInterface()
     {
-        MainInterfaceForm form = new MainInterfaceForm();
-        
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(form);
+        Application.Run(new MainInterfaceForm());
     }
 }

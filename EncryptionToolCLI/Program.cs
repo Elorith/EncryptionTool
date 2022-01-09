@@ -9,20 +9,20 @@ public class Program
      * 4) Securely release sensitive data from memory (ZeroMemory).
      * 5) Securely erase the original file from disk using implementation based on US DoD 5220.22-M (ECE).
      */
-    public static void Main(string[] args) => new Program().RunCommandLineInterface();
+    public static void Main(string[] args) => new Program().RunConsoleLineInterface();
 
     // Command-line interface implementation of the encryption tool.
-    public void RunCommandLineInterface()
+    public void RunConsoleLineInterface()
     {
         Console.Title = "Encryption Tool";
 
         ConsoleLineApplication application = new ConsoleLineApplication();
-        application.CreateCommandLineInterfaceTool();
+        application.CreateConsoleLineInterfaceTool();
         
         bool exitFlag = false;
         while (!exitFlag)
         {
-            application.RunCommandLineInterfaceTool(out exitFlag);
+            application.RunConsoleLineInterfaceTool(out exitFlag);
         }
     }
 } 
