@@ -14,20 +14,22 @@ This tool provides a portable, lightweight, and bloatware free interface for eas
 
 ## Usage (CLI application)
 
-Encrypt a file:
-
+Encrypt a file or directory:
 ```c#
 encrypt "C:\Users\Elorith\Documents\FileThatIWantToEncrypt.txt"
+encrypt "C:\Users\Elorith\Documents\DirectoryThatIWantToEncrypt\"
 ```
 
-Decrypt a file:
+Decrypt a file or directory:
 ```c#
 decrypt "C:\Users\Elorith\Documents\FileThatIWantToDecrypt.aes"
+decrypt "C:\Users\Elorith\Documents\DirectoryThatIWantToDecrypt\"
 ```
 
-Erase a file:
+Erase a file or directory:
 ```c#
 erase "C:\Users\Elorith\Documents\FileThatIWantToErase.txt"
+erase "C:\Users\Elorith\Documents\DirectoryThatIWantToErase\"
 ```
 
 Exit the application:
