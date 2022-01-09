@@ -66,17 +66,16 @@ public class CryptographyProvider
 
      public string DecryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
-          DirectoryInfo currentDirectory = new DirectoryInfo(path);
-          string headerOutputPath = Path.Combine(path, "_" + currentDirectory.Name + ".aes");
-
           string outputPath;
-          using (FileStream input = new FileStream(headerOutputPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
                string originalDirectoryName = this.DecryptHeaderFromStream(input, personalKey);
 
                outputPath = Path.Combine(parent.FullName, originalDirectoryName);
                Directory.CreateDirectory(outputPath);
           }
+          
+          File.Delete(path);
 
           return outputPath;
      }

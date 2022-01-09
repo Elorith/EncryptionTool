@@ -136,12 +136,17 @@ public class EncryptionTool
     {
         if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
         {
+            DirectoryInfo currentDirectory = new DirectoryInfo(path);
+            string headerInputPath = Path.Combine(path, "_" + currentDirectory.Name + ".aes");
+            
             CryptographyProvider cryptography = new CryptographyProvider();
-            string outputPath = cryptography.DecryptDirectoryRootToDiskWithPersonalKey(path, personalKey, parent);
+            string outputPath = cryptography.DecryptDirectoryRootToDiskWithPersonalKey(headerInputPath, personalKey, parent);
             
             Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
-            
+
             DirectoryInfo outputDirectory = new DirectoryInfo(outputPath);
+            
+            File.Delete(headerInputPath);
             
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
