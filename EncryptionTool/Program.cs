@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 public class Program
@@ -31,17 +32,34 @@ public class Program
             
             try
             {
+                string path = command[1].Trim('"');
+                bool isDirectory = (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
+                
                 if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
                 {
-                    application.DoFileEncryption(command[1].Trim('"'));
+                    if (!isDirectory)
+                    {
+                        application.DoFileEncryption(path);
+                    }
+                    else
+                    {
+                        application.DoDirectoryEncryption(path);
+                    }
                 }
                 else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
                 {
-                    application.DoFileDecryption(command[1].Trim('"'));
+                    if (!isDirectory)
+                    {
+                        application.DoFileDecryption(path);
+                    }
+                    else
+                    {
+                        application.DoDirectoryDecryption(path);
+                    }
                 }
                 else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
                 {
-                    application.DoSecureErase(command[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
+                    application.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
                 }
                 else
                 {
