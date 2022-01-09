@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 
 public class Program
 {
@@ -6,7 +9,7 @@ public class Program
      * 1) Take original file and encrypt using the user's personal key (which needs to be entered each time a security related action is taken).
      * 2) Write encrypted variation of the file to disk.
      * 3) Verify that the newly written file is valid by decrypting it from disk and checking it is identical.
-     * 4) Securely release user key from memory (ZeroMemory).
+     * 4) Securely release sensitive data from memory (ZeroMemory).
      * 5) Securely erase the original file from disk using implementation based on US DoD 5220.22-M (ECE).
      */
     public static void Main(string[] args) => new Program().RunCommandLineInterface();
@@ -20,53 +23,52 @@ public class Program
 
         while (true)
         {
-            string command = Console.ReadLine();
-            if (command == null)
-            {
-                continue;
-            }
+            string[] command = this.ReadCommandFromConsoleLine();
             
-            string[] split = command.Split(new []{' '},2);
-            if (string.Equals(split[0], "encrypt", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    application.DoFileEncryption(split[1].Trim('"'));
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (string.Equals(split[0], "decrypt", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    application.DoFileDecryption(split[1].Trim('"'));
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (string.Equals(split[0], "erase", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    application.DoSecureErase(split[1].Trim('"'), SanitisationAlgorithmType.DoDSensitive, true);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Singleton.WriteLine(ex.Message);
-                }
-            }
-            else if (string.Equals(split[0], "exit", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
             {
                 break;
             }
-            else
+            
+            try
             {
-                Logger.Singleton.WriteLine("Specified command was not recognised.");
+                string path = command[1].Trim('"');
+                bool isDirectory = (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
+                
+                if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!isDirectory)
+                    {
+                        application.DoFileEncryption(path);
+                    }
+                    else
+                    {
+                        application.DoDirectoryEncryption(path);
+                    }
+                }
+                else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!isDirectory)
+                    {
+                        application.DoFileDecryption(path);
+                    }
+                    else
+                    {
+                        application.DoDirectoryDecryption(path);
+                    }
+                }
+                else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
+                {
+                    application.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
+                }
+                else
+                {
+                    Logger.Singleton.WriteLine("Specified command was not recognised.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Singleton.WriteLine(ex.Message);
             }
         }
     }
@@ -111,7 +113,7 @@ public class Program
             Logger.Singleton.WriteLine("Encryption verification process successful.");
         });
         
-        application.OnEncryptionAndSecureEraseProcessCompleted += new EncryptionTool.OnEncryptionAndSecureEraseProcessCompletedCallback(() =>
+        application.OnEncryptionProcessCompleted += new EncryptionTool.OnEncryptionProcessCompletedCallback(() =>
         {
             Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
         });
@@ -131,6 +133,32 @@ public class Program
         return application;
     }
 
+    private string[] ReadCommandFromConsoleLine()
+    {
+        string input = Console.ReadLine();
+        if (input == null)
+        {
+            return null;
+        }
+        
+        List<string> command = new List<string>();
+
+        Regex splitter = new Regex(@"[\""].+?[\""]|[^ ]+", RegexOptions.Compiled);
+        foreach (Match match in splitter.Matches(input))
+        {
+            if (match.Value.Length == 0)
+            {
+                command.Add("");
+            }
+            else
+            {
+                command.Add(match.Value.TrimStart(','));
+            }
+        }
+
+        return command.ToArray();
+    }
+
     private string ReadPasswordFromConsoleLine()
     {
         string input = string.Empty;
@@ -138,7 +166,7 @@ public class Program
         ConsoleKey key;
         do
         {
-            var keyInfo = Console.ReadKey(true);
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
             key = keyInfo.Key;
 
             if (key == ConsoleKey.Backspace && input.Length > 0)
@@ -153,7 +181,6 @@ public class Program
             }
         }
         while (key != ConsoleKey.Enter);
-
         Console.Write("\n");
         
         return input;

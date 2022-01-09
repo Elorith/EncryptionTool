@@ -1,38 +1,102 @@
 using System;
 using System.IO;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 
 public class CryptographyProvider
 {
+     public static readonly string NonDynamicHashSalt = "b6b69e1f7d57426d_" + Environment.MachineName + "_";
+     
      public const int EncryptionKeySize = 256;
      public const int EncryptionBlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
+     
+     public const int Pbkdf2Iterations = 10000;
 
      #region Public API Functions
+     
+     public string EncryptStringWithPersonalKey(string original, string personalKey)
+     {
+          byte[] buffer = this.EncryptStringToBufferWithPersonalKey(original, personalKey);
+          string encrypted = this.BufferToHexadecimal(buffer);
 
-     public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
+          return encrypted;
+     }
+     
+     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
+     {
+          byte[] buffer = this.HexadecimalToBuffer(encrypted);
+          string original = this.DecryptStringFromBufferWithPersonalKey(buffer, personalKey);
+
+          return original;
+     }
+     
+     public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
+     {
+          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
+
+          return encrypted;
+     }
+
+     public string DecryptStringFromBufferWithPersonalKey(byte[] encrypted, string personalKey)
+     {
+          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
+
+          return original;
+     }
+     
+     public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
+     {
+          DirectoryInfo currentDirectory = new DirectoryInfo(path);
+          string encryptedDirectoryName = this.HashStringToString(currentDirectory.Name, HashAlgorithmType.Md5, true);
+
+          string directoryOutputPath = Path.Combine(parent.FullName, encryptedDirectoryName);
+          Directory.CreateDirectory(directoryOutputPath);
+
+          string headerOutputPath = Path.Combine(directoryOutputPath, "_" + encryptedDirectoryName + ".aes");
+          using (FileStream output = new FileStream(headerOutputPath, FileMode.Create))
+          {
+               string originalDirectoryName = currentDirectory.Name;
+               this.EncryptHeaderToStream(originalDirectoryName, output, personalKey);
+          }   
+
+          return directoryOutputPath;
+     }
+
+     public string DecryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string encryptedFileName = this.HashFileToString(path) + ".aes";
-               string directoryName = Path.GetDirectoryName(path);
+               string originalDirectoryName = this.DecryptHeaderFromStream(input, personalKey);
 
-               outputPath = Path.Combine(directoryName, encryptedFileName);
+               outputPath = Path.Combine(parent.FullName, originalDirectoryName);
+               Directory.CreateDirectory(outputPath);
+          }
+          
+          File.Delete(path);
+
+          return outputPath;
+     }
+
+     public string EncryptFileToDiskWithPersonalKey(string path, string personalKey)
+     {
+          string encryptedFileName = this.HashFileToString(path, HashAlgorithmType.Md5) + ".aes";
+          string directoryName = Path.GetDirectoryName(path);
+          
+          string outputPath = Path.Combine(directoryName, encryptedFileName);
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    byte[] originalFileName = this.EncryptStringWithPersonalKey(Path.GetFileName(path), personalKey);
-                    byte[] originalFileNameLength = BitConverter.GetBytes(originalFileName.Length);
-
-                    output.Write(originalFileNameLength, 0, 4);
-                    output.Write(originalFileName, 0, originalFileName.Length);
-
-                    this.EncryptToStreamWithPersonalKey(input, output, personalKey);
+                    string originalFileName = Path.GetFileName(path);
+                    this.EncryptHeaderToStream(originalFileName, output, personalKey);
+                    
+                    this.EncryptBodyToStream(input, output, personalKey);
                }
           }
-
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully encrypted to disk.");
+          
           return outputPath;
      }
 
@@ -41,23 +105,31 @@ public class CryptographyProvider
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               byte[] originalFileNameLength = new byte[4];
-               input.Read(originalFileNameLength, 0, 4);
-
-               byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
-               input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
-
-               string originalFileName = this.DecryptStringWithPersonalKey(originalFileNameBytes, personalKey);
+               string originalFileName = this.DecryptHeaderFromStream(input, personalKey);
 
                outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.DecryptBodyFromStream(input, output, personalKey);
                }
           }
-
-          Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
+          
           return outputPath;
+     }
+     
+     public byte[] EncryptFileToMemoryWithPersonalKey(string path, string personalKey)
+     {
+          byte[] buffer;
+          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
+               using (MemoryStream output = new MemoryStream())
+               {
+                    this.EncryptBodyToStream(input, output, personalKey);
+                    buffer = output.ToArray();
+               }
+          }
+          
+          return buffer;
      }
 
      public byte[] DecryptFileToMemoryWithPersonalKey(string path, string personalKey)
@@ -65,15 +137,11 @@ public class CryptographyProvider
           byte[] buffer;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               byte[] originalFileNameLength = new byte[4];
-               input.Read(originalFileNameLength, 0, 4);
-
-               byte[] originalFileNameBytes = new byte[BitConverter.ToInt32(originalFileNameLength, 0)];
-               input.Read(originalFileNameBytes, 0, originalFileNameBytes.Length);
+               this.DecryptHeaderFromStream(input, personalKey);
 
                using (MemoryStream output = new MemoryStream())
                {
-                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.DecryptBodyFromStream(input, output, personalKey);
                     buffer = output.ToArray();
                }
           }
@@ -81,37 +149,52 @@ public class CryptographyProvider
           return buffer;
      }
 
-     public byte[] EncryptStringWithPersonalKey(string original, string personalKey)
-     {
-          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
-
-          return encrypted;
-     }
-
-     public string DecryptStringWithPersonalKey(byte[] encrypted, string personalKey)
-     {
-          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
-
-          return original;
-     }
-
-     public string HashFileToString(string path)
+     public string HashFileToString(string path, HashAlgorithmType algorithmType)
      {
           string hash;
-          using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-          { 
-               hash = this.HashToString(input, false);
+          using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+          {
+               using (MemoryStream input = new MemoryStream())
+               {
+                    byte[] salt = Encoding.UTF8.GetBytes(CryptographyProvider.NonDynamicHashSalt);
+                    input.Write(salt, 0, salt.Length);
+                    
+                    file.CopyTo(input);
+                    
+                    hash = this.HashToStringSha(input, algorithmType);
+               }
           }
 
           return hash;
      }
 
-     public string HashBufferToString(byte[] buffer)
+     public string HashStringToString(string original, HashAlgorithmType algorithmType, bool usePbkdf2)
+     {
+          string hash = this.HashBufferToString(Encoding.UTF8.GetBytes(original), algorithmType, usePbkdf2);
+
+          return hash;
+     }
+     
+     public string HashBufferToString(byte[] buffer, HashAlgorithmType algorithmType, bool usePbkdf2)
      {
           string hash;
-          using (MemoryStream stream = new MemoryStream(buffer))
-          { 
-               hash = this.HashToString(stream, false);
+          if (usePbkdf2)
+          {
+               byte[] salt = Encoding.UTF8.GetBytes(CryptographyProvider.NonDynamicHashSalt);
+               
+               hash = this.HashToStringPbkdf2(buffer, salt, algorithmType);
+          }
+          else
+          {
+               using (MemoryStream input = new MemoryStream())
+               {
+                    byte[] salt = Encoding.UTF8.GetBytes(CryptographyProvider.NonDynamicHashSalt);
+                    input.Write(salt, 0, salt.Length);
+                    
+                    input.Write(buffer, 0, buffer.Length);
+                    
+                    hash = this.HashToStringSha(input, algorithmType);
+               }     
           }
 
           return hash;
@@ -128,7 +211,7 @@ public class CryptographyProvider
           {
                using (MemoryStream output = new MemoryStream())
                {
-                    this.EncryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.EncryptBodyToStream(input, output, personalKey);
                     encrypted = output.ToArray();
                }
           }
@@ -142,14 +225,34 @@ public class CryptographyProvider
           {
                using (MemoryStream output = new MemoryStream())
                {
-                    this.DecryptToStreamWithPersonalKey(input, output, personalKey);
+                    this.DecryptBodyFromStream(input, output, personalKey);
                     original = output.ToArray();
                }
           }
           return original;
      }
 
-     private void EncryptToStreamWithPersonalKey(Stream input, Stream output, string personalKey)
+     private void EncryptHeaderToStream(string header, Stream output, string personalKey)
+     {
+          byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header, personalKey);
+          byte[] headerLengthBytes = BitConverter.GetBytes(headerBytes.Length);
+
+          output.Write(headerLengthBytes, 0, 4);
+          output.Write(headerBytes, 0, headerBytes.Length);
+     }
+
+     private string DecryptHeaderFromStream(Stream input, string personalKey)
+     {
+          byte[] headerLengthBytes = new byte[4];
+          input.Read(headerLengthBytes, 0, 4);
+
+          byte[] headerBytes = new byte[BitConverter.ToInt32(headerLengthBytes, 0)];
+          input.Read(headerBytes, 0, headerBytes.Length);
+          
+          return this.DecryptStringFromBufferWithPersonalKey(headerBytes, personalKey);
+     }
+
+     private void EncryptBodyToStream(Stream input, Stream output, string personalKey)
      {
           byte[] salt = null;
           byte[] iv = null;
@@ -171,7 +274,7 @@ public class CryptographyProvider
           }
      }
 
-     private void DecryptToStreamWithPersonalKey(Stream input, Stream output, string personalKey)
+     private void DecryptBodyFromStream(Stream input, Stream output, string personalKey)
      {
           byte[] salt = new byte[CryptographyProvider.EncryptionKeySize / 8];
           byte[] iv = new byte[CryptographyProvider.EncryptionBlockSize / 8];
@@ -185,7 +288,7 @@ public class CryptographyProvider
                aes.BlockSize = CryptographyProvider.EncryptionBlockSize;
                aes.Padding = PaddingMode.ISO10126;
                aes.Mode = CipherMode.CBC;
-               
+
                aes.Key = this.RecalculateCipherPermutation(personalKey, ref salt, ref iv);
                aes.IV = iv;
                
@@ -232,46 +335,65 @@ public class CryptographyProvider
      
      #region Internal Hashing Functions
 
-     private string HashToString(Stream input, bool useUniqueCipherPermutation)
+     private string HashToStringPbkdf2(byte[] buffer, byte[] salt, HashAlgorithmType algorithmType)
      {
           string hash;
           using (MemoryStream output = new MemoryStream())
           {
-               this.HashToStream(input, output, useUniqueCipherPermutation);
+               this.HashToStreamPbkdf2(buffer, salt, output, algorithmType);
+               byte[] result = output.ToArray();
+
+               hash = this.BufferToHexadecimal(result);
+          }
+          
+          return hash;
+     }
+     
+     private void HashToStreamPbkdf2(byte[] buffer, byte[] salt, Stream output, HashAlgorithmType algorithmType)
+     {
+          HashAlgorithmName algorithm = new HashAlgorithmName(algorithmType.ToString().ToUpper());
+
+          byte[] hash;
+          int length = this.GetHashAlgorithmTypeLength(algorithmType);
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(buffer, salt, CryptographyProvider.Pbkdf2Iterations, algorithm))
+          {
+               hash = pbkdf2.GetBytes(length);
+          }
+          
+          output.Write(hash, 0, hash.Length);
+     }
+
+     private string HashToStringSha(Stream input, HashAlgorithmType algorithmType)
+     {
+          string hash;
+          using (MemoryStream output = new MemoryStream())
+          {
+               this.HashToStreamSha(input, output, algorithmType);
                byte[] buffer = output.ToArray();
 
-               StringBuilder builder = new StringBuilder();
-               for (int index = 0; index < buffer.Length; index++)
-               {
-                    byte value = buffer[index];
-                    builder.Append(value.ToString("x2"));  
-               }
-               hash = builder.ToString();
+               hash = this.BufferToHexadecimal(buffer);
           }
+          
           return hash;
      }
 
-     private void HashToStream(Stream input, Stream output, bool useUniqueCipherPermutation)
+     private void HashToStreamSha(Stream input, Stream output, HashAlgorithmType algorithmType)
      {
-          byte[] permutation;
-          if (useUniqueCipherPermutation)
+          byte[] hash;
+          using (HashAlgorithm sha = HashAlgorithm.Create(algorithmType.ToString().ToUpper()))
           {
-               /*byte[] unique = new byte[16];
-               using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+               if (sha == null)
                {
-                    rng.GetBytes(unique);
+                    throw new ArgumentException("Specified hash algorithm type is invalid");
                }
-    
-               permutation = this.RecalculateCipherPermutation(Encoding.UTF8.GetString(unique));*/
-               // TODO: Figure out how to implement this.    
+
+               input.Position = 0;
+               hash = sha.ComputeHash(input);
           }
-          using (SHA256 sha = SHA256.Create())
-          {
-               byte[] hash = sha.ComputeHash(input);
-               output.Write(hash, 0, hash.Length);
-          }
+          
+          output.Write(hash, 0, hash.Length);
      }
-     
+
      #endregion
      
      #region Miscellaneous Internal Functions
@@ -290,11 +412,62 @@ public class CryptographyProvider
                     rng.GetBytes(iv);
                }
           }
-          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(unique, salt, 10000))
+          using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(unique, salt, CryptographyProvider.Pbkdf2Iterations))
           {
                permutation = pbkdf2.GetBytes(CryptographyProvider.EncryptionKeySize / 8);
           }
           return permutation;
+     }
+
+     private string BufferToHexadecimal(byte[] buffer)
+     {
+          StringBuilder builder = new StringBuilder();
+          for (int index = 0; index < buffer.Length; index++)
+          {
+               byte value = buffer[index];
+               builder.Append(value.ToString("x2"));  
+          }
+          
+          return builder.ToString();
+     }
+     
+     private byte[] HexadecimalToBuffer(string hex)
+     {
+          int length = hex.Length;
+          
+          byte[] buffer = new byte[length / 2];
+          for (int index = 0; index < length; index += 2)
+          {
+               buffer[index / 2] = Convert.ToByte(hex.Substring(index, 2), 16);
+          }
+
+          return buffer;
+     }
+
+     private int GetHashAlgorithmTypeLength(HashAlgorithmType algorithmType)
+     {
+          if (algorithmType == HashAlgorithmType.Md5)
+          {
+               return 128 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha1)
+          {
+               return 160 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha256)
+          {
+               return 256 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha384)
+          {
+               return 384 / 8;
+          }
+          if (algorithmType == HashAlgorithmType.Sha512)
+          {
+               return 512 / 8;
+          }
+
+          throw new ArgumentException("Specified hash algorithm type is invalid");
      }
      
      #endregion
