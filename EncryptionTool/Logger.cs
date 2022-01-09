@@ -5,10 +5,16 @@ using System.Threading;
 public class Logger
 {
     private readonly StringBuilder builder = new StringBuilder(1024);
+    private ILogger handle;
     [ThreadStatic]
     private static Logger singleton;
-    
+
     public static Logger Singleton => Logger.singleton ?? (Logger.singleton = new Logger());
+    
+    public void SetHandle(ILogger logger)
+    {
+        this.handle = logger;
+    }
 
     public void WriteLine(string message)
     {
@@ -20,7 +26,12 @@ public class Logger
         this.AppendCarriageReturn(); 
         
         string text = this.builder.ToString();
-        Console.Write(text);
+        this.WriteToHandle(text);
+    }
+
+    private void WriteToHandle(string output)
+    {
+        this.handle?.Write(output);
     }
 
     private void AppendTimestamp()

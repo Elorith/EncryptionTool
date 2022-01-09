@@ -16,6 +16,9 @@ public class Program
     {
         Console.Title = "Encryption Tool";
 
+        ConsoleLineLogger logger = new ConsoleLineLogger();
+        Logger.Singleton.SetHandle(logger);
+
         ConsoleLineApplication application = new ConsoleLineApplication();
         application.CreateConsoleLineInterfaceTool();
         

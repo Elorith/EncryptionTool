@@ -43,6 +43,7 @@
     <ItemGroup>
         <Compile Include="CryptographyProvider.cs" />
         <Compile Include="EncryptionTool.cs" />
+        <Compile Include="ILogger.cs" />
         <Compile Include="SanitisationAlgorithmType.cs" />
         <Compile Include="Logger.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
