@@ -1,8 +1,8 @@
 ﻿using System.Windows.Forms;
 
-public partial class MainInterfaceForm : Form
+public partial class FormMainInterface : Form
 {
-    public MainInterfaceForm()
+    public FormMainInterface()
     {
         this.InitializeComponent();
     }

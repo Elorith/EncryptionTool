@@ -12,10 +12,12 @@ public class Program
     // GUI implementation of the encryption tool.
     public void RunGraphicalUserInterface()
     {
-        
-        
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(new MainInterfaceForm());
+
+        FormMainInterface userInterface = new FormMainInterface();
+        userInterface.Text = @"Encryption Tool";
+        
+        Application.Run(userInterface);
     }
 }
