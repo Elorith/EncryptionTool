@@ -12,6 +12,7 @@
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <ApplicationIcon>..\favicon.ico</ApplicationIcon>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,6 +50,11 @@
         <Project>{245f98b8-855b-4cd5-b9f4-5ee54d43b279}</Project>
         <Name>EncryptionTool</Name>
       </ProjectReference>
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="..\favicon.ico">
+        <Link>favicon.ico</Link>
+      </None>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

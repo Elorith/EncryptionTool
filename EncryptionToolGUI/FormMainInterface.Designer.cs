@@ -27,11 +27,25 @@
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
+        this.toolStripDropDownMenu1 = new System.Windows.Forms.ToolStripDropDownMenu();
+        this.SuspendLayout();
+        // 
+        // toolStripDropDownMenu1
+        // 
+        this.toolStripDropDownMenu1.Name = "toolStripDropDownMenu1";
+        this.toolStripDropDownMenu1.Size = new System.Drawing.Size(61, 4);
+        // 
+        // FormMainInterface
+        // 
+        this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 450);
+        this.Name = "FormMainInterface";
         this.Text = "Form1";
+        this.ResumeLayout(false);
     }
+
+    private System.Windows.Forms.ToolStripDropDownMenu toolStripDropDownMenu1;
 
     #endregion
 }
