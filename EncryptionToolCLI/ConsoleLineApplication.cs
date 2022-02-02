@@ -106,7 +106,7 @@ public class ConsoleLineApplication
             }
             else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
             {
-                tool.DoSecureErase(path, SanitisationAlgorithmType.DoDFast, true);
+                tool.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
             }
             else
             {
