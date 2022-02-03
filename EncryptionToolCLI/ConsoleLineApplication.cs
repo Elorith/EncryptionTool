@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-public class ConsoleLineApplication
+public class ConsoleLineApplication : EncryptionTool
 {
-    private EncryptionTool tool;
-    
-    public EncryptionTool CreateConsoleLineInterfaceTool()
+    public void CreateConsoleLineInterfaceTool()
     {
-        this.tool = new EncryptionTool();
-
-        this.tool.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
+        this.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
         {
             Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
             string response = Console.ReadLine();
@@ -23,50 +19,48 @@ public class ConsoleLineApplication
             return true;
         });
 
-        this.tool.OnAskUserToEnterPasswordForEncryption += new EncryptionTool.OnAskUserToEnterPasswordForEncryptionCallback((path) =>
+        this.OnAskUserToEnterPasswordForEncryption += new EncryptionTool.OnAskUserToEnterPasswordForEncryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
 
             return this.ReadPasswordFromConsoleLine();
         });
 
-        this.tool.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
+        this.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("Please re-enter the password.");
 
             return this.ReadPasswordFromConsoleLine();
         });
 
-        this.tool.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
+        this.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
         {
             Logger.Singleton.WriteLine("Passwords do not match!");
         });
 
-        this.tool.OnEncryptionVerificationProcessSuccess += new EncryptionTool.OnEncryptionVerificationProcessSuccessCallback(() =>
+        this.OnEncryptionVerificationProcessSuccess += new EncryptionTool.OnEncryptionVerificationProcessSuccessCallback(() =>
         {
             Logger.Singleton.WriteLine("Encryption verification process successful.");
         });
 
-        this.tool.OnEncryptionProcessCompleted += new EncryptionTool.OnEncryptionProcessCompletedCallback(() =>
+        this.OnEncryptionProcessCompleted += new EncryptionTool.OnEncryptionProcessCompletedCallback(() =>
         {
             Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
         });
 
-        this.tool.OnAskUserToEnterPasswordForDecryption += new EncryptionTool.OnAskUserToEnterPasswordForDecryptionCallback((path) =>
+        this.OnAskUserToEnterPasswordForDecryption += new EncryptionTool.OnAskUserToEnterPasswordForDecryptionCallback((path) =>
         {
             Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
 
             return this.ReadPasswordFromConsoleLine();
         });
 
-        this.tool.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
+        this.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
         {
             Logger.Singleton.WriteLine("Decryption process successfully completed.");
         });
-
-        return this.tool;
     }
-    
+
     public void RunConsoleLineInterfaceTool(out bool exitFlag)
     {
         string[] command = this.ReadCommandFromConsoleLine();
@@ -86,27 +80,27 @@ public class ConsoleLineApplication
             {
                 if (!isDirectory)
                 {
-                    tool.DoFileEncryption(path);
+                    this.DoFileEncryption(path);
                 }
                 else
                 {
-                    tool.DoDirectoryEncryption(path);
+                    this.DoDirectoryEncryption(path);
                 }
             }
             else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
             {
                 if (!isDirectory)
                 {
-                    tool.DoFileDecryption(path);
+                    this.DoFileDecryption(path);
                 }
                 else
                 {
-                    tool.DoDirectoryDecryption(path);
+                    this.DoDirectoryDecryption(path);
                 }
             }
             else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
             {
-                tool.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
+                this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
             }
             else
             {

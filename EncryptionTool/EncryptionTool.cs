@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 
-public class EncryptionTool
+public abstract class EncryptionTool
 {
     public delegate string OnAskUserToEnterPasswordForEncryptionCallback(string path);
     public delegate string OnAskUserToRepeatPasswordForEncryptionCallback(string path);
