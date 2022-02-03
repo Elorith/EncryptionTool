@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-public class ConsoleLineApplication : EncryptionTool
+public class ConsoleLineEncryptionTool : EncryptionTool
 {
     public void RunTool()
     {
@@ -59,7 +59,7 @@ public class ConsoleLineApplication : EncryptionTool
         }
     }
     
-        protected override string AskUserToEnterPasswordForEncryption(string path)
+    protected override string AskUserToEnterPasswordForEncryption(string path)
     {
         Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
 

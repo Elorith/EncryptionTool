@@ -266,7 +266,11 @@ public abstract class EncryptionTool
     protected abstract string AskUserToEnterPasswordForDecryption(string path);
     protected abstract void DecryptionProcessCompleted();
     protected abstract bool AskUserForEraseConfirmation(string path);
-    
+
+    public virtual void RunTool()
+    {
+    }
+
     public EncryptionTool()
     {
         this.OnAskUserToEnterPasswordForEncryption += this.AskUserToEnterPasswordForEncryption;

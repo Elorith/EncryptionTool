@@ -15,9 +15,7 @@ public class Program
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        FormMainInterface userInterface = new FormMainInterface();
-        userInterface.Text = @"Encryption Tool";
-        
-        Application.Run(userInterface);
+        WinformsEncryptionTool tool = new WinformsEncryptionTool();
+        tool.RunTool();
     }
 }

@@ -40,7 +40,7 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="ConsoleLineApplication.cs" />
+        <Compile Include="ConsoleLineApplicationcs.cs" />
         <Compile Include="ConsoleLineLogger.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

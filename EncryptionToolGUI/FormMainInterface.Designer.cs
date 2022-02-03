@@ -34,21 +34,23 @@
         this.CheckBoxEncryptFiles = new System.Windows.Forms.CheckBox();
         this.CheckBoxEncryptDirectories = new System.Windows.Forms.CheckBox();
         this.DialogSelectPathDirectory = new System.Windows.Forms.FolderBrowserDialog();
+        this.ButtonEncrypt = new System.Windows.Forms.Button();
+        this.ButtonDecrypt = new System.Windows.Forms.Button();
         this.SuspendLayout();
         // 
         // TextBoxSelectedPath
         // 
         this.TextBoxSelectedPath.Location = new System.Drawing.Point(12, 15);
         this.TextBoxSelectedPath.Name = "TextBoxSelectedPath";
-        this.TextBoxSelectedPath.Size = new System.Drawing.Size(576, 22);
+        this.TextBoxSelectedPath.Size = new System.Drawing.Size(528, 22);
         this.TextBoxSelectedPath.TabIndex = 0;
         this.TextBoxSelectedPath.Text = "";
         // 
         // ButtonSelectPath
         // 
-        this.ButtonSelectPath.Location = new System.Drawing.Point(594, 15);
+        this.ButtonSelectPath.Location = new System.Drawing.Point(546, 15);
         this.ButtonSelectPath.Name = "ButtonSelectPath";
-        this.ButtonSelectPath.Size = new System.Drawing.Size(71, 22);
+        this.ButtonSelectPath.Size = new System.Drawing.Size(61, 22);
         this.ButtonSelectPath.TabIndex = 1;
         this.ButtonSelectPath.Text = "Browse";
         this.ButtonSelectPath.UseVisualStyleBackColor = true;
@@ -58,7 +60,7 @@
         // 
         this.CheckBoxEncryptFiles.Checked = true;
         this.CheckBoxEncryptFiles.CheckState = System.Windows.Forms.CheckState.Checked;
-        this.CheckBoxEncryptFiles.Location = new System.Drawing.Point(12, 45);
+        this.CheckBoxEncryptFiles.Location = new System.Drawing.Point(14, 48);
         this.CheckBoxEncryptFiles.Name = "CheckBoxEncryptFiles";
         this.CheckBoxEncryptFiles.Size = new System.Drawing.Size(98, 25);
         this.CheckBoxEncryptFiles.TabIndex = 2;
@@ -68,7 +70,7 @@
         // 
         // CheckBoxEncryptDirectories
         // 
-        this.CheckBoxEncryptDirectories.Location = new System.Drawing.Point(129, 45);
+        this.CheckBoxEncryptDirectories.Location = new System.Drawing.Point(129, 48);
         this.CheckBoxEncryptDirectories.Name = "CheckBoxEncryptDirectories";
         this.CheckBoxEncryptDirectories.Size = new System.Drawing.Size(109, 25);
         this.CheckBoxEncryptDirectories.TabIndex = 3;
@@ -76,20 +78,47 @@
         this.CheckBoxEncryptDirectories.UseVisualStyleBackColor = true;
         this.CheckBoxEncryptDirectories.CheckedChanged += new System.EventHandler(this.CheckBoxEncryptDirectories_CheckedChanged);
         // 
+        // ButtonEncrypt
+        // 
+        this.ButtonEncrypt.Location = new System.Drawing.Point(12, 162);
+        this.ButtonEncrypt.Name = "ButtonEncrypt";
+        this.ButtonEncrypt.Size = new System.Drawing.Size(138, 34);
+        this.ButtonEncrypt.TabIndex = 4;
+        this.ButtonEncrypt.Text = "Encrypt";
+        this.ButtonEncrypt.UseVisualStyleBackColor = true;
+        this.ButtonEncrypt.Click += new System.EventHandler(this.ButtonEncrypt_Click);
+        // 
+        // ButtonDecrypt
+        // 
+        this.ButtonDecrypt.Location = new System.Drawing.Point(165, 162);
+        this.ButtonDecrypt.Name = "ButtonDecrypt";
+        this.ButtonDecrypt.Size = new System.Drawing.Size(138, 34);
+        this.ButtonDecrypt.TabIndex = 5;
+        this.ButtonDecrypt.Text = "Decrypt";
+        this.ButtonDecrypt.UseVisualStyleBackColor = true;
+        this.ButtonDecrypt.Click += new System.EventHandler(this.ButtonDecrypt_Click);
+        // 
         // FormMainInterface
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(672, 302);
+        this.BackColor = System.Drawing.SystemColors.Control;
+        this.ClientSize = new System.Drawing.Size(616, 208);
+        this.Controls.Add(this.ButtonDecrypt);
+        this.Controls.Add(this.ButtonEncrypt);
         this.Controls.Add(this.CheckBoxEncryptDirectories);
         this.Controls.Add(this.CheckBoxEncryptFiles);
         this.Controls.Add(this.ButtonSelectPath);
         this.Controls.Add(this.TextBoxSelectedPath);
         this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+        this.Location = new System.Drawing.Point(15, 15);
         this.Name = "FormMainInterface";
-        this.Text = "Encryption Tool";
         this.ResumeLayout(false);
     }
+
+    private System.Windows.Forms.Button ButtonDecrypt;
+
+    private System.Windows.Forms.Button ButtonEncrypt;
 
     private System.Windows.Forms.FolderBrowserDialog DialogSelectPathDirectory;
 

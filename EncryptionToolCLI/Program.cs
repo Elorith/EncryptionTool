@@ -19,7 +19,7 @@ public class Program
         ConsoleLineLogger logger = new ConsoleLineLogger();
         Logger.Singleton.SetHandle(logger);
 
-        ConsoleLineApplication application = new ConsoleLineApplication();
-        application.RunTool();
+        ConsoleLineEncryptionTool encryptionTool = new ConsoleLineEncryptionTool();
+        encryptionTool.RunTool();
     }
 } 

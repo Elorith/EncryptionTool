@@ -4,19 +4,25 @@ using System.Windows.Forms;
 
 public partial class FormMainInterface : Form
 {
-    private bool checkboxChangedFlag = false;
+    public delegate void OnBeginEncryptCallback(string path);
+    public delegate void OnBeginDecryptCallback(string path);
     
+    public event OnBeginEncryptCallback OnBeginEncrypt;
+    public event OnBeginDecryptCallback OnBeginDecrypt;
+    
+    private bool checkboxChangedFlag = false;
+
     public FormMainInterface()
     {
         this.InitializeComponent();
     }
 
-    public bool HasFileEncryptionMode()
+    public bool IsEncryptionModeFiles()
     {
         return this.CheckBoxEncryptFiles.Checked && !this.CheckBoxEncryptDirectories.Checked;
     }
-    
-    public bool HasDirectoryEncryptionMode()
+
+    public bool IsEncryptionModeDirectories()
     {
         return this.CheckBoxEncryptDirectories.Checked && !this.CheckBoxEncryptFiles.Checked;
     }
@@ -24,21 +30,21 @@ public partial class FormMainInterface : Form
     public string Browse()
     {
         string path;
-        if (this.HasFileEncryptionMode())
+        if (this.IsEncryptionModeFiles())
         {
             DialogResult result = this.DialogSelectPathFile.ShowDialog();
             path = this.DialogSelectPathFile.FileName;
-            
+
             if (result != DialogResult.OK || !File.Exists(path))
             {
                 throw new Exception("Selected file path invalid");
             }
         }
-        else if (this.HasDirectoryEncryptionMode())
+        else if (this.IsEncryptionModeDirectories())
         {
             DialogResult result = this.DialogSelectPathDirectory.ShowDialog();
             path = this.DialogSelectPathDirectory.SelectedPath;
-            
+
             if (result != DialogResult.OK || !Directory.Exists(path))
             {
                 throw new Exception("Selected directory path invalid");
@@ -48,8 +54,28 @@ public partial class FormMainInterface : Form
         {
             throw new Exception("Neither encryption mode is selected");
         }
-        
+
         return path;
+    }
+
+    public void Encrypt(string path)
+    {
+        if (!this.IsEncryptionModeFiles() && !this.IsEncryptionModeDirectories())
+        {
+            throw new Exception("Neither encryption mode is selected");
+        }
+
+        this.OnBeginEncrypt(path);
+    }
+
+    public void Decrypt(string path)
+    {
+        if (!this.IsEncryptionModeFiles() && !this.IsEncryptionModeDirectories())
+        {
+            throw new Exception("Neither encryption mode is selected");
+        }
+
+        this.OnBeginDecrypt(path);
     }
 
     private void ButtonSelectPath_Click(object sender, EventArgs e)
@@ -85,5 +111,15 @@ public partial class FormMainInterface : Form
         {
             this.CheckBoxEncryptDirectories.Checked = true;
         }
+    }
+
+    private void ButtonEncrypt_Click(object sender, EventArgs e)
+    {
+        this.Encrypt(this.TextBoxSelectedPath.Text);
+    }
+
+    private void ButtonDecrypt_Click(object sender, EventArgs e)
+    {
+        this.Decrypt(this.TextBoxSelectedPath.Text);
     }
 }
