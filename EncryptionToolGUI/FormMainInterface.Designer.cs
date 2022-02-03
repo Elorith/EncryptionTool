@@ -62,7 +62,7 @@
         this.CheckBoxEncryptFiles.Name = "CheckBoxEncryptFiles";
         this.CheckBoxEncryptFiles.Size = new System.Drawing.Size(98, 25);
         this.CheckBoxEncryptFiles.TabIndex = 2;
-        this.CheckBoxEncryptFiles.Text = "File";
+        this.CheckBoxEncryptFiles.Text = "Encrypt File";
         this.CheckBoxEncryptFiles.UseVisualStyleBackColor = true;
         this.CheckBoxEncryptFiles.CheckedChanged += new System.EventHandler(this.CheckBoxEncryptFiles_CheckedChanged);
         // 
@@ -72,7 +72,7 @@
         this.CheckBoxEncryptDirectories.Name = "CheckBoxEncryptDirectories";
         this.CheckBoxEncryptDirectories.Size = new System.Drawing.Size(109, 25);
         this.CheckBoxEncryptDirectories.TabIndex = 3;
-        this.CheckBoxEncryptDirectories.Text = "Directory";
+        this.CheckBoxEncryptDirectories.Text = "Encrypt Directory";
         this.CheckBoxEncryptDirectories.UseVisualStyleBackColor = true;
         this.CheckBoxEncryptDirectories.CheckedChanged += new System.EventHandler(this.CheckBoxEncryptDirectories_CheckedChanged);
         // 
