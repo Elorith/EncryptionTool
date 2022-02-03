@@ -23,7 +23,7 @@ public abstract class EncryptionTool
     public event OnAskUserToEnterPasswordForDecryptionCallback OnAskUserToEnterPasswordForDecryption;
     public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
     public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
-
+    
     public void DoFileEncryption(string path)
     {
         if (!File.Exists(path))

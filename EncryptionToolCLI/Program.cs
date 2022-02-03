@@ -20,12 +20,7 @@ public class Program
         Logger.Singleton.SetHandle(logger);
 
         ConsoleLineApplication application = new ConsoleLineApplication();
-        application.CreateConsoleLineInterfaceTool();
-        
-        bool exitFlag = false;
-        while (!exitFlag)
-        {
-            application.RunConsoleLineInterfaceTool(out exitFlag);
-        }
+        application.RegisterTool();
+        application.RunTool();
     }
 } 

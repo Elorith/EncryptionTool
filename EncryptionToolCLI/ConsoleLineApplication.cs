@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 public class ConsoleLineApplication : EncryptionTool
 {
-    public void CreateConsoleLineInterfaceTool()
+    public void RegisterTool()
     {
         this.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
         {
@@ -61,55 +61,57 @@ public class ConsoleLineApplication : EncryptionTool
         });
     }
 
-    public void RunConsoleLineInterfaceTool(out bool exitFlag)
+    public void RunTool()
     {
-        string[] command = this.ReadCommandFromConsoleLine();
-            
-        if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
+        while (true)
         {
-            exitFlag = true;
-        }
+            string[] command = this.ReadCommandFromConsoleLine();
             
-        exitFlag = false;
-        try
-        {
-            string path = command[1].Trim('"');
-            bool isDirectory = (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
+            if (string.Equals(command[0], "exit", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+            
+            try
+            {
+                string path = command[1].Trim('"');
+                bool isDirectory = (File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory;
                 
-            if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!isDirectory)
+                if (string.Equals(command[0], "encrypt", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.DoFileEncryption(path);
+                    if (!isDirectory)
+                    {
+                        this.DoFileEncryption(path);
+                    }
+                    else
+                    {
+                        this.DoDirectoryEncryption(path);
+                    }
+                }
+                else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!isDirectory)
+                    {
+                        this.DoFileDecryption(path);
+                    }
+                    else
+                    {
+                        this.DoDirectoryDecryption(path);
+                    }
+                }
+                else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
+                {
+                    this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
                 }
                 else
                 {
-                    this.DoDirectoryEncryption(path);
+                    Logger.Singleton.WriteLine("Specified command was not recognised.");
                 }
             }
-            else if (string.Equals(command[0], "decrypt", StringComparison.OrdinalIgnoreCase))
+            catch (Exception ex)
             {
-                if (!isDirectory)
-                {
-                    this.DoFileDecryption(path);
-                }
-                else
-                {
-                    this.DoDirectoryDecryption(path);
-                }
-            }
-            else if (string.Equals(command[0], "erase", StringComparison.OrdinalIgnoreCase))
-            {
-                this.DoSecureErase(path, SanitisationAlgorithmType.DoDSensitive, true);
-            }
-            else
-            {
-                Logger.Singleton.WriteLine("Specified command was not recognised.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Singleton.WriteLine(ex.Message);
+                Logger.Singleton.WriteLine(ex.Message);
+            }   
         }
     }
 
