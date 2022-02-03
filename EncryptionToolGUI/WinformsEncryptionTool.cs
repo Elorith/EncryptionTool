@@ -3,42 +3,48 @@ using System.Windows.Forms;
 
 public class WinformsEncryptionTool : EncryptionTool
 {
-    private FormMainInterface mainInterface;
+    private FormMainInterface formMainInterface;
+    private FormEncryptionTask formEncryptionTask;
     
     public override void RunTool()
     {
-        this.mainInterface = new FormMainInterface();
-        this.mainInterface.Text = @"Encryption Tool";
+        this.formMainInterface = new FormMainInterface();
 
-        this.mainInterface.OnBeginEncrypt += this.BeginEncrypt;
-        this.mainInterface.OnBeginDecrypt += this.BeginDecrypt;
+        this.formMainInterface.OnBeginEncrypt += this.BeginEncrypt;
+        this.formMainInterface.OnBeginDecrypt += this.BeginDecrypt;
         
-        Application.Run(this.mainInterface);
+        Application.Run(this.formMainInterface);
     }
 
     private void BeginEncrypt(string path)
     {
-        if (!this.mainInterface.IsEncryptionModeFiles())
+        this.formEncryptionTask = new FormEncryptionTask();
+        this.formEncryptionTask.Show();
+        
+        if (this.formMainInterface.IsEncryptionModeFiles())
         {
-            this.DoFileDecryption(path);
+            this.DoFileEncryption(path);
         }
-        else if (!this.mainInterface.IsEncryptionModeDirectories())
+        else if (this.formMainInterface.IsEncryptionModeDirectories())
         {
-            this.DoDirectoryDecryption(path);
+            this.DoDirectoryEncryption(path);
         }
         else
         {
             throw new Exception("Neither encryption mode is selected");
         }
+        
+        this.formEncryptionTask.Close();
+        this.formEncryptionTask = null;
     }
     
     private void BeginDecrypt(string path)
     {
-        if (!this.mainInterface.IsEncryptionModeFiles())
+        if (this.formMainInterface.IsEncryptionModeFiles())
         {
             this.DoFileDecryption(path);
         }
-        else if (!this.mainInterface.IsEncryptionModeDirectories())
+        else if (this.formMainInterface.IsEncryptionModeDirectories())
         {
             this.DoDirectoryDecryption(path);
         }

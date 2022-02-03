@@ -80,7 +80,7 @@
         // 
         // ButtonEncrypt
         // 
-        this.ButtonEncrypt.Location = new System.Drawing.Point(12, 162);
+        this.ButtonEncrypt.Location = new System.Drawing.Point(12, 271);
         this.ButtonEncrypt.Name = "ButtonEncrypt";
         this.ButtonEncrypt.Size = new System.Drawing.Size(138, 34);
         this.ButtonEncrypt.TabIndex = 4;
@@ -90,7 +90,7 @@
         // 
         // ButtonDecrypt
         // 
-        this.ButtonDecrypt.Location = new System.Drawing.Point(165, 162);
+        this.ButtonDecrypt.Location = new System.Drawing.Point(165, 271);
         this.ButtonDecrypt.Name = "ButtonDecrypt";
         this.ButtonDecrypt.Size = new System.Drawing.Size(138, 34);
         this.ButtonDecrypt.TabIndex = 5;
@@ -103,7 +103,7 @@
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.BackColor = System.Drawing.SystemColors.Control;
-        this.ClientSize = new System.Drawing.Size(616, 208);
+        this.ClientSize = new System.Drawing.Size(616, 317);
         this.Controls.Add(this.ButtonDecrypt);
         this.Controls.Add(this.ButtonEncrypt);
         this.Controls.Add(this.CheckBoxEncryptDirectories);
@@ -113,6 +113,7 @@
         this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
         this.Location = new System.Drawing.Point(15, 15);
         this.Name = "FormMainInterface";
+        this.Text = "Encryption Tool";
         this.ResumeLayout(false);
     }
 
