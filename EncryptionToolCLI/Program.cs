@@ -20,7 +20,6 @@ public class Program
         Logger.Singleton.SetHandle(logger);
 
         ConsoleLineApplication application = new ConsoleLineApplication();
-        application.RegisterTool();
         application.RunTool();
     }
 } 

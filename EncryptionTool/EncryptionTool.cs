@@ -23,7 +23,7 @@ public abstract class EncryptionTool
     public event OnAskUserToEnterPasswordForDecryptionCallback OnAskUserToEnterPasswordForDecryption;
     public event OnDecryptionProcessCompletedCallback OnDecryptionProcessCompleted;
     public event OnAskUserForEraseConfirmationCallback OnAskUserForEraseConfirmation;
-    
+
     public void DoFileEncryption(string path)
     {
         if (!File.Exists(path))
@@ -256,5 +256,26 @@ public abstract class EncryptionTool
     {
         EncryptionTool.ZeroMemory(handle.AddrOfPinnedObject(), length);
         handle.Free();
+    }
+    
+    protected abstract string AskUserToEnterPasswordForEncryption(string path);
+    protected abstract string AskUserToRepeatPasswordForEncryption(string path);
+    protected abstract void UserEnteredNonMatchingPasswords();
+    protected abstract void EncryptionVerificationProcessSuccess();
+    protected abstract void EncryptionProcessCompleted();
+    protected abstract string AskUserToEnterPasswordForDecryption(string path);
+    protected abstract void DecryptionProcessCompleted();
+    protected abstract bool AskUserForEraseConfirmation(string path);
+    
+    public EncryptionTool()
+    {
+        this.OnAskUserToEnterPasswordForEncryption += this.AskUserToEnterPasswordForEncryption;
+        this.OnAskUserToRepeatPasswordForEncryption += this.AskUserToRepeatPasswordForEncryption;
+        this.OnUserEnteredNonMatchingPasswords += this.UserEnteredNonMatchingPasswords;
+        this.OnEncryptionVerificationProcessSuccess += this.EncryptionVerificationProcessSuccess;
+        this.OnEncryptionProcessCompleted += this.EncryptionProcessCompleted;
+        this.OnAskUserToEnterPasswordForDecryption += this.AskUserToEnterPasswordForDecryption;
+        this.OnDecryptionProcessCompleted += this.DecryptionProcessCompleted;
+        this.OnAskUserForEraseConfirmation += this.AskUserForEraseConfirmation;
     }
 }

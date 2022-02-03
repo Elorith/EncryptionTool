@@ -5,62 +5,6 @@ using System.Text.RegularExpressions;
 
 public class ConsoleLineApplication : EncryptionTool
 {
-    public void RegisterTool()
-    {
-        this.OnAskUserForEraseConfirmation += new EncryptionTool.OnAskUserForEraseConfirmationCallback((path) =>
-        {
-            Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
-            string response = Console.ReadLine();
-            if (response != "Y" && response != "y")
-            {
-                return false;
-            }
-
-            return true;
-        });
-
-        this.OnAskUserToEnterPasswordForEncryption += new EncryptionTool.OnAskUserToEnterPasswordForEncryptionCallback((path) =>
-        {
-            Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
-
-            return this.ReadPasswordFromConsoleLine();
-        });
-
-        this.OnAskUserToRepeatPasswordForEncryption += new EncryptionTool.OnAskUserToRepeatPasswordForEncryptionCallback((path) =>
-        {
-            Logger.Singleton.WriteLine("Please re-enter the password.");
-
-            return this.ReadPasswordFromConsoleLine();
-        });
-
-        this.OnUserEnteredNonMatchingPasswords += new EncryptionTool.OnUserEnteredNonMatchingPasswordsCallback(() =>
-        {
-            Logger.Singleton.WriteLine("Passwords do not match!");
-        });
-
-        this.OnEncryptionVerificationProcessSuccess += new EncryptionTool.OnEncryptionVerificationProcessSuccessCallback(() =>
-        {
-            Logger.Singleton.WriteLine("Encryption verification process successful.");
-        });
-
-        this.OnEncryptionProcessCompleted += new EncryptionTool.OnEncryptionProcessCompletedCallback(() =>
-        {
-            Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
-        });
-
-        this.OnAskUserToEnterPasswordForDecryption += new EncryptionTool.OnAskUserToEnterPasswordForDecryptionCallback((path) =>
-        {
-            Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
-
-            return this.ReadPasswordFromConsoleLine();
-        });
-
-        this.OnDecryptionProcessCompleted += new EncryptionTool.OnDecryptionProcessCompletedCallback(() =>
-        {
-            Logger.Singleton.WriteLine("Decryption process successfully completed.");
-        });
-    }
-
     public void RunTool()
     {
         while (true)
@@ -113,6 +57,59 @@ public class ConsoleLineApplication : EncryptionTool
                 Logger.Singleton.WriteLine(ex.Message);
             }   
         }
+    }
+    
+        protected override string AskUserToEnterPasswordForEncryption(string path)
+    {
+        Logger.Singleton.WriteLine("'" + path + "' will be encrypted and securely erased. Please enter a password to encrypt with.");
+
+        return this.ReadPasswordFromConsoleLine();
+    }
+
+    protected override string AskUserToRepeatPasswordForEncryption(string path)
+    {
+        Logger.Singleton.WriteLine("Please reenter the password.");
+
+        return this.ReadPasswordFromConsoleLine();
+    }
+
+    protected override void UserEnteredNonMatchingPasswords()
+    {
+        Logger.Singleton.WriteLine("Passwords do not match!");
+    }
+
+    protected override void EncryptionVerificationProcessSuccess()
+    {
+        Logger.Singleton.WriteLine("Encryption verification process successful.");
+    }
+
+    protected override void EncryptionProcessCompleted()
+    {
+        Logger.Singleton.WriteLine("Encryption and secure erase process successfully completed.");
+    }
+
+    protected override string AskUserToEnterPasswordForDecryption(string path)
+    {
+        Logger.Singleton.WriteLine("'" + path + "' will be decrypted. Please enter the password originally used to encrypt with.");
+
+        return this.ReadPasswordFromConsoleLine();
+    }
+
+    protected override void DecryptionProcessCompleted()
+    {
+        Logger.Singleton.WriteLine("Decryption process successfully completed.");
+    }
+
+    protected override bool AskUserForEraseConfirmation(string path)
+    {
+        Logger.Singleton.WriteLine("Are you sure you want to start erase of: '" + path + "' (Y/N)?");
+        string response = Console.ReadLine();
+        if (response != "Y" && response != "y")
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private string[] ReadCommandFromConsoleLine()
