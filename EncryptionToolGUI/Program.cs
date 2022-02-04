@@ -14,6 +14,9 @@ public class Program
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        
+        WinformsLogger logger = new WinformsLogger();
+        Logger.Singleton.SetHandle(logger);
 
         WinformsEncryptionTool tool = new WinformsEncryptionTool();
         tool.RunTool();
