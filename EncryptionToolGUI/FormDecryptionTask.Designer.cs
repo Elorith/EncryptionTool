@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-partial class FormEncryptionTask
+partial class FormDecryptionTask
 {
     /// <summary>
     /// Required designer variable.
@@ -29,17 +29,15 @@ partial class FormEncryptionTask
     /// </summary>
     private void InitializeComponent()
     {
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEncryptionTask));
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDecryptionTask));
         this.ButtonSubmitTask = new System.Windows.Forms.Button();
         this.TextBoxPassword = new System.Windows.Forms.RichTextBox();
-        this.TextBoxConfirmPassword = new System.Windows.Forms.RichTextBox();
         this.LabelPasswordField = new System.Windows.Forms.Label();
-        this.LabelConfirmPasswordField = new System.Windows.Forms.Label();
         this.SuspendLayout();
         // 
         // ButtonSubmitTask
         // 
-        this.ButtonSubmitTask.Location = new System.Drawing.Point(76, 114);
+        this.ButtonSubmitTask.Location = new System.Drawing.Point(75, 64);
         this.ButtonSubmitTask.Name = "ButtonSubmitTask";
         this.ButtonSubmitTask.Size = new System.Drawing.Size(113, 26);
         this.ButtonSubmitTask.TabIndex = 0;
@@ -55,14 +53,6 @@ partial class FormEncryptionTask
         this.TextBoxPassword.TabIndex = 1;
         this.TextBoxPassword.Text = "";
         // 
-        // TextBoxConfirmPassword
-        // 
-        this.TextBoxConfirmPassword.Location = new System.Drawing.Point(12, 81);
-        this.TextBoxConfirmPassword.Name = "TextBoxConfirmPassword";
-        this.TextBoxConfirmPassword.Size = new System.Drawing.Size(236, 21);
-        this.TextBoxConfirmPassword.TabIndex = 2;
-        this.TextBoxConfirmPassword.Text = "";
-        // 
         // LabelPasswordField
         // 
         this.LabelPasswordField.BackColor = System.Drawing.Color.Transparent;
@@ -73,38 +63,24 @@ partial class FormEncryptionTask
         this.LabelPasswordField.Text = "Password";
         this.LabelPasswordField.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         // 
-        // LabelConfirmPasswordField
-        // 
-        this.LabelConfirmPasswordField.Location = new System.Drawing.Point(12, 57);
-        this.LabelConfirmPasswordField.Name = "LabelConfirmPasswordField";
-        this.LabelConfirmPasswordField.Size = new System.Drawing.Size(236, 21);
-        this.LabelConfirmPasswordField.TabIndex = 4;
-        this.LabelConfirmPasswordField.Text = "Confirm Password";
-        this.LabelConfirmPasswordField.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-        // 
-        // FormEncryptionTask
+        // FormDecryptionTask
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(260, 152);
-        this.Controls.Add(this.LabelConfirmPasswordField);
+        this.ClientSize = new System.Drawing.Size(260, 102);
         this.Controls.Add(this.LabelPasswordField);
-        this.Controls.Add(this.TextBoxConfirmPassword);
         this.Controls.Add(this.TextBoxPassword);
         this.Controls.Add(this.ButtonSubmitTask);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
         this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
-        this.Name = "FormEncryptionTask";
+        this.Name = "FormDecryptionTask";
         this.Text = "Config";
         this.ResumeLayout(false);
     }
 
-    private System.Windows.Forms.Label LabelConfirmPasswordField;
-
     private System.Windows.Forms.Label LabelPasswordField;
 
     private System.Windows.Forms.RichTextBox TextBoxPassword;
-    private System.Windows.Forms.RichTextBox TextBoxConfirmPassword;
 
     private System.Windows.Forms.Button ButtonSubmitTask;
 

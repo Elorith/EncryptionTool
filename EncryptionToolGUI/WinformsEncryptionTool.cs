@@ -5,6 +5,7 @@ public class WinformsEncryptionTool : EncryptionTool
 {
     private FormMainInterface formMainInterface;
     private FormEncryptionTask formEncryptionTask;
+    private FormDecryptionTask formDecryptionTask;
     
     public override void RunTool()
     {
@@ -19,6 +20,7 @@ public class WinformsEncryptionTool : EncryptionTool
     {
         this.formEncryptionTask = new FormEncryptionTask();
         this.formEncryptionTask.OnFormSubmitted += () => this.ContinueEncrypt(path);
+        this.formEncryptionTask.FormClosed += (sender, args) => this.AfterEncrypt();
         this.formEncryptionTask.Show();
     }
 
@@ -38,10 +40,22 @@ public class WinformsEncryptionTool : EncryptionTool
         }
         
         this.formEncryptionTask.Close();
+    }
+
+    private void AfterEncrypt()
+    {
         this.formEncryptionTask = null;
     }
     
     private void BeginDecrypt(string path)
+    {
+        this.formDecryptionTask = new FormDecryptionTask();
+        this.formDecryptionTask.OnFormSubmitted += () => this.ContinueDecrypt(path);
+        this.formDecryptionTask.FormClosed += (sender, args) => this.AfterDecrypt();
+        this.formDecryptionTask.Show();
+    }
+
+    private void ContinueDecrypt(string path)
     {
         if (this.formMainInterface.IsEncryptionModeFiles())
         {
@@ -55,6 +69,13 @@ public class WinformsEncryptionTool : EncryptionTool
         {
             throw new Exception("Neither encryption mode is selected");
         }
+        
+        this.formDecryptionTask.Close();
+    }
+    
+    private void AfterDecrypt()
+    {
+        this.formDecryptionTask = null;
     }
     
     protected override string AskUserToEnterPasswordForEncryption(string path)
@@ -83,12 +104,12 @@ public class WinformsEncryptionTool : EncryptionTool
 
     protected override string AskUserToEnterPasswordForDecryption(string path)
     {
-        throw new System.NotImplementedException();
+        return this.formDecryptionTask.GetPasswordField();
     }
 
     protected override void DecryptionProcessCompleted()
     {
-        throw new System.NotImplementedException();
+        MessageBox.Show("Successfully decrypted the specified path.");
     }
 
     protected override bool AskUserForEraseConfirmation(string path)

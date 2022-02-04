@@ -47,6 +47,12 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="FormDecryptionTask.cs">
+          <SubType>Form</SubType>
+        </Compile>
+        <Compile Include="FormDecryptionTask.Designer.cs">
+          <DependentUpon>FormDecryptionTask.cs</DependentUpon>
+        </Compile>
         <Compile Include="FormEncryptionTask.cs">
           <SubType>Form</SubType>
         </Compile>
@@ -62,6 +68,9 @@
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="WinformsEncryptionTool.cs" />
+        <EmbeddedResource Include="FormDecryptionTask.resx">
+          <DependentUpon>FormDecryptionTask.cs</DependentUpon>
+        </EmbeddedResource>
         <EmbeddedResource Include="FormEncryptionTask.resx">
           <DependentUpon>FormEncryptionTask.cs</DependentUpon>
         </EmbeddedResource>
