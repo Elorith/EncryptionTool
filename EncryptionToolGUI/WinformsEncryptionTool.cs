@@ -9,7 +9,6 @@ public class WinformsEncryptionTool : EncryptionTool
     public override void RunTool()
     {
         this.formMainInterface = new FormMainInterface();
-
         this.formMainInterface.OnBeginEncrypt += this.BeginEncrypt;
         this.formMainInterface.OnBeginDecrypt += this.BeginDecrypt;
         
@@ -19,8 +18,12 @@ public class WinformsEncryptionTool : EncryptionTool
     private void BeginEncrypt(string path)
     {
         this.formEncryptionTask = new FormEncryptionTask();
+        this.formEncryptionTask.OnFormSubmitted += () => this.ContinueEncrypt(path);
         this.formEncryptionTask.Show();
-        
+    }
+
+    private void ContinueEncrypt(string path)
+    {
         if (this.formMainInterface.IsEncryptionModeFiles())
         {
             this.DoFileEncryption(path);
@@ -56,27 +59,26 @@ public class WinformsEncryptionTool : EncryptionTool
     
     protected override string AskUserToEnterPasswordForEncryption(string path)
     {
-        throw new System.NotImplementedException();
+        return this.formEncryptionTask.GetPasswordField();
     }
 
     protected override string AskUserToRepeatPasswordForEncryption(string path)
     {
-        throw new System.NotImplementedException();
+        return this.formEncryptionTask.GetConfirmPasswordField();
     }
 
     protected override void UserEnteredNonMatchingPasswords()
     {
-        throw new System.NotImplementedException();
+        MessageBox.Show("Entered passwords did not match!");
     }
 
     protected override void EncryptionVerificationProcessSuccess()
     {
-        throw new System.NotImplementedException();
     }
 
     protected override void EncryptionProcessCompleted()
     {
-        throw new System.NotImplementedException();
+        MessageBox.Show("Successfully encrypted the specified path.");
     }
 
     protected override string AskUserToEnterPasswordForDecryption(string path)
