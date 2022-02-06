@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows.Forms;
 
 public class WinformsEncryptionTool : EncryptionTool
@@ -26,19 +27,22 @@ public class WinformsEncryptionTool : EncryptionTool
 
     private void ContinueEncrypt(string path)
     {
-        if (this.formMainInterface.IsEncryptionModeFiles())
+        if (File.Exists(path))
         {
-            this.DoFileEncryption(path);
+            if (this.formMainInterface.IsEncryptionModeFiles())
+            {
+                this.DoFileEncryption(path);
+            }
+            else if (this.formMainInterface.IsEncryptionModeDirectories())
+            {
+                this.DoDirectoryEncryption(path);
+            }
+            else
+            {
+                throw new Exception("Neither encryption mode is selected");
+            }
         }
-        else if (this.formMainInterface.IsEncryptionModeDirectories())
-        {
-            this.DoDirectoryEncryption(path);
-        }
-        else
-        {
-            throw new Exception("Neither encryption mode is selected");
-        }
-        
+
         this.formEncryptionTask.Close();
     }
 
@@ -57,19 +61,22 @@ public class WinformsEncryptionTool : EncryptionTool
 
     private void ContinueDecrypt(string path)
     {
-        if (this.formMainInterface.IsEncryptionModeFiles())
+        if (File.Exists(path))
         {
-            this.DoFileDecryption(path);
+            if (this.formMainInterface.IsEncryptionModeFiles())
+            {
+                this.DoFileDecryption(path);
+            }
+            else if (this.formMainInterface.IsEncryptionModeDirectories())
+            {
+                this.DoDirectoryDecryption(path);
+            }
+            else
+            {
+                throw new Exception("Neither encryption mode is selected");
+            }   
         }
-        else if (this.formMainInterface.IsEncryptionModeDirectories())
-        {
-            this.DoDirectoryDecryption(path);
-        }
-        else
-        {
-            throw new Exception("Neither encryption mode is selected");
-        }
-        
+
         this.formDecryptionTask.Close();
     }
     

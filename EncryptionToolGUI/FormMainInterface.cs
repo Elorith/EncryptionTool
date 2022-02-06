@@ -29,30 +29,26 @@ public partial class FormMainInterface : Form
 
     public string Browse()
     {
+        DialogResult result;
         string path;
         if (this.IsEncryptionModeFiles())
-        {
-            DialogResult result = this.DialogSelectPathFile.ShowDialog();
+        { 
+            result = this.DialogSelectPathFile.ShowDialog();
             path = this.DialogSelectPathFile.FileName;
-
-            if (result != DialogResult.OK || !File.Exists(path))
-            {
-                throw new Exception("Selected file path invalid");
-            }
         }
         else if (this.IsEncryptionModeDirectories())
         {
-            DialogResult result = this.DialogSelectPathDirectory.ShowDialog();
+            result = this.DialogSelectPathDirectory.ShowDialog();
             path = this.DialogSelectPathDirectory.SelectedPath;
-
-            if (result != DialogResult.OK || !Directory.Exists(path))
-            {
-                throw new Exception("Selected directory path invalid");
-            }
         }
         else
         {
             throw new Exception("Neither encryption mode is selected");
+        }
+        
+        if (result != DialogResult.Cancel && !File.Exists(path))
+        {
+            throw new Exception("Selected directory path invalid");
         }
 
         return path;
