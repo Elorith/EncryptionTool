@@ -27,7 +27,7 @@ public class WinformsEncryptionTool : EncryptionTool
 
     private void ContinueEncrypt(string path)
     {
-        if (File.Exists(path))
+        if (File.Exists(path) || Directory.Exists(path))
         {
             if (this.formMainInterface.IsEncryptionModeFiles())
             {
@@ -61,7 +61,7 @@ public class WinformsEncryptionTool : EncryptionTool
 
     private void ContinueDecrypt(string path)
     {
-        if (File.Exists(path))
+        if (File.Exists(path) || Directory.Exists(path))
         {
             if (this.formMainInterface.IsEncryptionModeFiles())
             {

@@ -51,13 +51,13 @@ public abstract class EncryptionTool
         {
             throw new ArgumentException("Specified path has no parent");
         }
-        
+
         string personalKey = this.AskUserForPersonalKeyForEncryption(path);
         if (personalKey == null)
         {
             return;
         }
-
+        
         this.EncryptPathRecursive(path, personalKey, rootParent);
     }
     

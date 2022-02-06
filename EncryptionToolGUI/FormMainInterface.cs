@@ -46,9 +46,9 @@ public partial class FormMainInterface : Form
             throw new Exception("Neither encryption mode is selected");
         }
         
-        if (result != DialogResult.Cancel && !File.Exists(path))
+        if (result != DialogResult.Cancel && !File.Exists(path) && !Directory.Exists(path))
         {
-            throw new Exception("Selected directory path invalid");
+            throw new Exception("Selected path invalid");
         }
 
         return path;
