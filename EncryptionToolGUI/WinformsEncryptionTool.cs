@@ -48,6 +48,7 @@ public class WinformsEncryptionTool : EncryptionTool
 
     private void AfterEncrypt()
     {
+        this.formMainInterface.ClearSelectedPath();
         this.formEncryptionTask = null;
     }
     
@@ -82,6 +83,7 @@ public class WinformsEncryptionTool : EncryptionTool
     
     private void AfterDecrypt()
     {
+        this.formMainInterface.ClearSelectedPath();
         this.formDecryptionTask = null;
     }
     

@@ -74,6 +74,11 @@ public partial class FormMainInterface : Form
         this.OnBeginDecrypt(path);
     }
 
+    public void ClearSelectedPath()
+    {
+        this.TextBoxSelectedPath.Text = "";
+    }
+
     private void ButtonSelectPath_Click(object sender, EventArgs e)
     {
         this.TextBoxSelectedPath.Text = this.Browse();
@@ -86,7 +91,7 @@ public partial class FormMainInterface : Form
             this.checkboxChangedFlag = true;
             this.CheckBoxEncryptDirectories.Checked = false;
             this.checkboxChangedFlag = false;
-            this.TextBoxSelectedPath.Text = "";
+            this.ClearSelectedPath();
         }
         else if (!checkboxChangedFlag)
         {
@@ -101,7 +106,7 @@ public partial class FormMainInterface : Form
             this.checkboxChangedFlag = true;
             this.CheckBoxEncryptFiles.Checked = false;
             this.checkboxChangedFlag = false;
-            this.TextBoxSelectedPath.Text = "";
+
         }
         else if (!checkboxChangedFlag)
         {
