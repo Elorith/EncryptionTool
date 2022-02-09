@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 
@@ -121,7 +120,7 @@ public abstract class EncryptionTool
                 this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
             }
             
-            this.HandleSensitiveResource(personalKey, personalKey.Length, true);
+            MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length, true);
 
             Directory.Delete(path);
         }
@@ -155,7 +154,7 @@ public abstract class EncryptionTool
                 this.DecryptPathRecursive(subPath, personalKey, outputDirectory);
             }
             
-            this.HandleSensitiveResource(personalKey, personalKey.Length, true);
+            MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length, true);
 
             Directory.Delete(path);
         }
@@ -181,7 +180,7 @@ public abstract class EncryptionTool
 
             string hash = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
 
-            this.HandleSensitiveResource(decrypted, decrypted.Length, true);
+            MemoryManagement.HandleSensitiveResource(decrypted, decrypted.Length, true);
 
             if (hash != Path.GetFileNameWithoutExtension(outputPath))
             {
@@ -195,7 +194,7 @@ public abstract class EncryptionTool
         
         this.OnEncryptionVerificationProcessSuccess();
         
-        this.HandleSensitiveResource(personalKey, personalKey.Length * 2, releasePersonalKey);
+        MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length * 2, releasePersonalKey);
         
         this.DoSecureErase(path, sanitisationType, false);
         
@@ -209,7 +208,7 @@ public abstract class EncryptionTool
         
         Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
         
-        this.HandleSensitiveResource(personalKey, personalKey.Length * 2, releasePersonalKey);
+        MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length * 2, releasePersonalKey);
         
         File.Delete(path);
 
@@ -224,7 +223,7 @@ public abstract class EncryptionTool
         string personalKey = null;
         if (response != response2)
         {
-            this.HandleSensitiveResource(response, response.Length * 2, true);
+            MemoryManagement.HandleSensitiveResource(response, response.Length * 2, true);
 
             this.OnUserEnteredNonMatchingPasswords();
         }
@@ -233,7 +232,7 @@ public abstract class EncryptionTool
             personalKey = response;
         }
         
-        this.HandleSensitiveResource(response2, response2.Length * 2, true);
+        MemoryManagement.HandleSensitiveResource(response2, response2.Length * 2, true);
 
         return personalKey;
     }
@@ -241,31 +240,6 @@ public abstract class EncryptionTool
     private string AskUserForPersonalKeyForDecryption(string path)
     {
         return this.OnAskUserToEnterPasswordForDecryption(path);
-    }
-
-    [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
-    private static extern bool ZeroMemory(IntPtr destination, int length);
-
-    private void HandleSensitiveResource(object resource, int resourceLength, bool releaseResource)
-    {
-        if (!releaseResource)
-        {
-            return;
-        }
-        
-        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(resource);
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, resourceLength);
-    }
-
-    private GCHandle AllocatePinnedGarbageCollectionHandle(object value)
-    {
-        return GCHandle.Alloc(value, GCHandleType.Pinned);
-    }
-
-    private void SecurelyReleasePinnedGarbageCollectionHandle(GCHandle handle, int length)
-    {
-        EncryptionTool.ZeroMemory(handle.AddrOfPinnedObject(), length);
-        handle.Free();
     }
     
     protected abstract string AskUserToEnterPasswordForEncryption(string path);
