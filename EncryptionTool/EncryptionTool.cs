@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 
-public class EncryptionTool
+public abstract class EncryptionTool
 {
     public delegate string OnAskUserToEnterPasswordForEncryptionCallback(string path);
     public delegate string OnAskUserToRepeatPasswordForEncryptionCallback(string path);
@@ -51,13 +51,13 @@ public class EncryptionTool
         {
             throw new ArgumentException("Specified path has no parent");
         }
-        
+
         string personalKey = this.AskUserForPersonalKeyForEncryption(path);
         if (personalKey == null)
         {
             return;
         }
-
+        
         this.EncryptPathRecursive(path, personalKey, rootParent);
     }
     
@@ -256,5 +256,30 @@ public class EncryptionTool
     {
         EncryptionTool.ZeroMemory(handle.AddrOfPinnedObject(), length);
         handle.Free();
+    }
+    
+    protected abstract string AskUserToEnterPasswordForEncryption(string path);
+    protected abstract string AskUserToRepeatPasswordForEncryption(string path);
+    protected abstract void UserEnteredNonMatchingPasswords();
+    protected abstract void EncryptionVerificationProcessSuccess();
+    protected abstract void EncryptionProcessCompleted();
+    protected abstract string AskUserToEnterPasswordForDecryption(string path);
+    protected abstract void DecryptionProcessCompleted();
+    protected abstract bool AskUserForEraseConfirmation(string path);
+
+    public virtual void RunTool()
+    {
+    }
+
+    public EncryptionTool()
+    {
+        this.OnAskUserToEnterPasswordForEncryption += this.AskUserToEnterPasswordForEncryption;
+        this.OnAskUserToRepeatPasswordForEncryption += this.AskUserToRepeatPasswordForEncryption;
+        this.OnUserEnteredNonMatchingPasswords += this.UserEnteredNonMatchingPasswords;
+        this.OnEncryptionVerificationProcessSuccess += this.EncryptionVerificationProcessSuccess;
+        this.OnEncryptionProcessCompleted += this.EncryptionProcessCompleted;
+        this.OnAskUserToEnterPasswordForDecryption += this.AskUserToEnterPasswordForDecryption;
+        this.OnDecryptionProcessCompleted += this.DecryptionProcessCompleted;
+        this.OnAskUserForEraseConfirmation += this.AskUserForEraseConfirmation;
     }
 }

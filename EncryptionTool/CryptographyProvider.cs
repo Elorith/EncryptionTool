@@ -59,7 +59,9 @@ public class CryptographyProvider
           {
                string originalDirectoryName = currentDirectory.Name;
                this.EncryptHeaderToStream(originalDirectoryName, output, personalKey);
-          }   
+          }
+          
+          File.SetAttributes(headerOutputPath, File.GetAttributes(headerOutputPath) | FileAttributes.Hidden);
 
           return directoryOutputPath;
      }
