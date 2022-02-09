@@ -43,6 +43,7 @@ public class WinformsEncryptionTool : EncryptionTool
                 {
                     throw new Exception("Neither encryption mode is selected");
                 }
+                MessageBox.Show("Successfully encrypted the specified path.");
             }
             catch (Exception ex)
             {
@@ -84,7 +85,8 @@ public class WinformsEncryptionTool : EncryptionTool
                 else
                 {
                     throw new Exception("Neither encryption mode is selected");
-                }  
+                }
+                MessageBox.Show("Successfully decrypted the specified path.");
             }
             catch (Exception ex)
             {
@@ -122,7 +124,6 @@ public class WinformsEncryptionTool : EncryptionTool
 
     protected override void EncryptionProcessCompleted()
     {
-        MessageBox.Show("Successfully encrypted the specified path.");
     }
 
     protected override string AskUserToEnterPasswordForDecryption(string path)
@@ -132,7 +133,6 @@ public class WinformsEncryptionTool : EncryptionTool
 
     protected override void DecryptionProcessCompleted()
     {
-        MessageBox.Show("Successfully decrypted the specified path.");
     }
 
     protected override bool AskUserForEraseConfirmation(string path)
