@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 public class ConsoleLineEncryptionTool : EncryptionTool
 {
-    public void RunTool()
+    public override void RunTool()
     {
         while (true)
         {

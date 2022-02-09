@@ -37,7 +37,7 @@ public abstract class EncryptionTool
             return;
         }
         
-        this.EncryptFile(path, personalKey);
+        this.EncryptFile(path, personalKey, true);
     }
 
     public void DoDirectoryEncryption(string path)
@@ -120,6 +120,8 @@ public abstract class EncryptionTool
             {
                 this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
             }
+            
+            this.HandleSensitiveResource(personalKey, personalKey.Length, true);
 
             Directory.Delete(path);
         }
@@ -128,7 +130,7 @@ public abstract class EncryptionTool
             string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
             File.Move(path, newPath);
 
-            this.EncryptFile(newPath, personalKey, sanitisationType);
+            this.EncryptFile(newPath, personalKey, false, sanitisationType);
         }
     }
 
@@ -152,6 +154,8 @@ public abstract class EncryptionTool
             {
                 this.DecryptPathRecursive(subPath, personalKey, outputDirectory);
             }
+            
+            this.HandleSensitiveResource(personalKey, personalKey.Length, true);
 
             Directory.Delete(path);
         }
@@ -160,11 +164,11 @@ public abstract class EncryptionTool
             string newPath = Path.Combine(parent.FullName, Path.GetFileName(path));
             File.Move(path, newPath);
 
-            this.DecryptFile(newPath, personalKey);
+            this.DecryptFile(newPath, personalKey, false);
         }
     }
 
-    private void EncryptFile(string path, string personalKey, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
+    private void EncryptFile(string path, string personalKey, bool releasePersonalKey = true, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
     {
         CryptographyProvider cryptography = new CryptographyProvider();
         string outputPath = cryptography.EncryptFileToDiskWithPersonalKey(path, personalKey);
@@ -176,9 +180,8 @@ public abstract class EncryptionTool
             byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
 
             string hash = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
-            
-            GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(decrypted);
-            this.SecurelyReleasePinnedGarbageCollectionHandle(handle, decrypted.Length);
+
+            this.HandleSensitiveResource(decrypted, decrypted.Length, true);
 
             if (hash != Path.GetFileNameWithoutExtension(outputPath))
             {
@@ -192,23 +195,21 @@ public abstract class EncryptionTool
         
         this.OnEncryptionVerificationProcessSuccess();
         
-        GCHandle handle2 = this.AllocatePinnedGarbageCollectionHandle(personalKey);
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle2, personalKey.Length * 2);
-
+        this.HandleSensitiveResource(personalKey, personalKey.Length * 2, releasePersonalKey);
+        
         this.DoSecureErase(path, sanitisationType, false);
         
         this.OnEncryptionProcessCompleted();
     }
 
-    private void DecryptFile(string path, string personalKey)
+    private void DecryptFile(string path, string personalKey, bool releasePersonalKey = true)
     {
         CryptographyProvider cryptography = new CryptographyProvider();
         cryptography.DecryptFileToDiskWithPersonalKey(path, personalKey);
         
         Logger.Singleton.WriteLine("'" + path + "' has been successfully decrypted to disk.");
         
-        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(personalKey);
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, personalKey.Length * 2);
+        this.HandleSensitiveResource(personalKey, personalKey.Length * 2, releasePersonalKey);
         
         File.Delete(path);
 
@@ -223,9 +224,8 @@ public abstract class EncryptionTool
         string personalKey = null;
         if (response != response2)
         {
-            GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(response);
-            this.SecurelyReleasePinnedGarbageCollectionHandle(handle, response.Length * 2);
-            
+            this.HandleSensitiveResource(response, response.Length * 2, true);
+
             this.OnUserEnteredNonMatchingPasswords();
         }
         else
@@ -233,8 +233,7 @@ public abstract class EncryptionTool
             personalKey = response;
         }
         
-        GCHandle handle2 = this.AllocatePinnedGarbageCollectionHandle(response2);
-        this.SecurelyReleasePinnedGarbageCollectionHandle(handle2, response2.Length * 2);
+        this.HandleSensitiveResource(response2, response2.Length * 2, true);
 
         return personalKey;
     }
@@ -246,6 +245,17 @@ public abstract class EncryptionTool
 
     [DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory")]
     private static extern bool ZeroMemory(IntPtr destination, int length);
+
+    private void HandleSensitiveResource(object resource, int resourceLength, bool releaseResource)
+    {
+        if (!releaseResource)
+        {
+            return;
+        }
+        
+        GCHandle handle = this.AllocatePinnedGarbageCollectionHandle(resource);
+        this.SecurelyReleasePinnedGarbageCollectionHandle(handle, resourceLength);
+    }
 
     private GCHandle AllocatePinnedGarbageCollectionHandle(object value)
     {
