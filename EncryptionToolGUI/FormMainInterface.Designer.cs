@@ -28,7 +28,6 @@
     private void InitializeComponent()
     {
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMainInterface));
-        this.TextBoxSelectedPath = new System.Windows.Forms.RichTextBox();
         this.ButtonSelectPath = new System.Windows.Forms.Button();
         this.DialogSelectPathFile = new System.Windows.Forms.OpenFileDialog();
         this.CheckBoxEncryptFiles = new System.Windows.Forms.CheckBox();
@@ -36,15 +35,8 @@
         this.DialogSelectPathDirectory = new System.Windows.Forms.FolderBrowserDialog();
         this.ButtonEncrypt = new System.Windows.Forms.Button();
         this.ButtonDecrypt = new System.Windows.Forms.Button();
+        this.TextBoxSelectedPath = new System.Windows.Forms.TextBox();
         this.SuspendLayout();
-        // 
-        // TextBoxSelectedPath
-        // 
-        this.TextBoxSelectedPath.Location = new System.Drawing.Point(12, 15);
-        this.TextBoxSelectedPath.Name = "TextBoxSelectedPath";
-        this.TextBoxSelectedPath.Size = new System.Drawing.Size(528, 22);
-        this.TextBoxSelectedPath.TabIndex = 0;
-        this.TextBoxSelectedPath.Text = "";
         // 
         // ButtonSelectPath
         // 
@@ -98,25 +90,36 @@
         this.ButtonDecrypt.UseVisualStyleBackColor = true;
         this.ButtonDecrypt.Click += new System.EventHandler(this.ButtonDecrypt_Click);
         // 
+        // TextBoxSelectedPath
+        // 
+        this.TextBoxSelectedPath.AcceptsTab = true;
+        this.TextBoxSelectedPath.Location = new System.Drawing.Point(14, 15);
+        this.TextBoxSelectedPath.Name = "TextBoxSelectedPath";
+        this.TextBoxSelectedPath.Size = new System.Drawing.Size(527, 20);
+        this.TextBoxSelectedPath.TabIndex = 6;
+        // 
         // FormMainInterface
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.BackColor = System.Drawing.SystemColors.Control;
         this.ClientSize = new System.Drawing.Size(616, 227);
+        this.Controls.Add(this.TextBoxSelectedPath);
         this.Controls.Add(this.ButtonDecrypt);
         this.Controls.Add(this.ButtonEncrypt);
         this.Controls.Add(this.CheckBoxEncryptDirectories);
         this.Controls.Add(this.CheckBoxEncryptFiles);
         this.Controls.Add(this.ButtonSelectPath);
-        this.Controls.Add(this.TextBoxSelectedPath);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
         this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
         this.Location = new System.Drawing.Point(15, 15);
         this.Name = "FormMainInterface";
         this.Text = "Encryption Tool";
         this.ResumeLayout(false);
+        this.PerformLayout();
     }
+
+    private System.Windows.Forms.TextBox TextBoxSelectedPath;
 
     private System.Windows.Forms.Button ButtonDecrypt;
 
@@ -129,7 +132,6 @@
 
     private System.Windows.Forms.OpenFileDialog DialogSelectPathFile;
 
-    private System.Windows.Forms.RichTextBox TextBoxSelectedPath;
     private System.Windows.Forms.Button ButtonSelectPath;
 
     #endregion

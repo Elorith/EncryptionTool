@@ -11,6 +11,7 @@ public partial class FormDecryptionTask : Form
     {
         this.InitializeComponent();
         
+        this.TextBoxPassword.PasswordChar = '*';
         this.CenterToScreen();
     }
 

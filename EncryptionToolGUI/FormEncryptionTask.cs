@@ -11,6 +11,8 @@ public partial class FormEncryptionTask : Form
     {
         this.InitializeComponent();
         
+        this.TextBoxPassword.PasswordChar = '*';
+        this.TextBoxConfirmPassword.PasswordChar = '*';
         this.CenterToScreen();
     }
 
