@@ -29,17 +29,24 @@ public class WinformsEncryptionTool : EncryptionTool
     {
         if (File.Exists(path) || Directory.Exists(path))
         {
-            if (this.formMainInterface.IsEncryptionModeFiles())
+            try
             {
-                this.DoFileEncryption(path);
+                if (this.formMainInterface.IsEncryptionModeFiles())
+                {
+                    this.DoFileEncryption(path);
+                }
+                else if (this.formMainInterface.IsEncryptionModeDirectories())
+                {
+                    this.DoDirectoryEncryption(path);
+                }
+                else
+                {
+                    throw new Exception("Neither encryption mode is selected");
+                }
             }
-            else if (this.formMainInterface.IsEncryptionModeDirectories())
+            catch (Exception ex)
             {
-                this.DoDirectoryEncryption(path);
-            }
-            else
-            {
-                throw new Exception("Neither encryption mode is selected");
+                MessageBox.Show("Error! " + ex.Message);
             }
         }
 
@@ -64,18 +71,25 @@ public class WinformsEncryptionTool : EncryptionTool
     {
         if (File.Exists(path) || Directory.Exists(path))
         {
-            if (this.formMainInterface.IsEncryptionModeFiles())
+            try
             {
-                this.DoFileDecryption(path);
+                if (this.formMainInterface.IsEncryptionModeFiles())
+                {
+                    this.DoFileDecryption(path);
+                }
+                else if (this.formMainInterface.IsEncryptionModeDirectories())
+                {
+                    this.DoDirectoryDecryption(path);
+                }
+                else
+                {
+                    throw new Exception("Neither encryption mode is selected");
+                }  
             }
-            else if (this.formMainInterface.IsEncryptionModeDirectories())
+            catch (Exception ex)
             {
-                this.DoDirectoryDecryption(path);
+                MessageBox.Show("Error! " + ex.Message);
             }
-            else
-            {
-                throw new Exception("Neither encryption mode is selected");
-            }   
         }
 
         this.formDecryptionTask.Close();
