@@ -60,7 +60,7 @@ partial class FormDecryptionTask
         this.LabelPasswordField.Name = "LabelPasswordField";
         this.LabelPasswordField.Size = new System.Drawing.Size(87, 21);
         this.LabelPasswordField.TabIndex = 3;
-        this.LabelPasswordField.Text = "Password";
+        this.LabelPasswordField.Text = "Enter password";
         this.LabelPasswordField.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         // 
         // FormDecryptionTask

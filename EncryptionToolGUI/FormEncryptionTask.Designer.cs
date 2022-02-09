@@ -70,7 +70,7 @@ partial class FormEncryptionTask
         this.LabelPasswordField.Name = "LabelPasswordField";
         this.LabelPasswordField.Size = new System.Drawing.Size(87, 21);
         this.LabelPasswordField.TabIndex = 3;
-        this.LabelPasswordField.Text = "Password";
+        this.LabelPasswordField.Text = "Enter password";
         this.LabelPasswordField.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         // 
         // LabelConfirmPasswordField
@@ -79,7 +79,7 @@ partial class FormEncryptionTask
         this.LabelConfirmPasswordField.Name = "LabelConfirmPasswordField";
         this.LabelConfirmPasswordField.Size = new System.Drawing.Size(236, 21);
         this.LabelConfirmPasswordField.TabIndex = 4;
-        this.LabelConfirmPasswordField.Text = "Confirm Password";
+        this.LabelConfirmPasswordField.Text = "Confirm password";
         this.LabelConfirmPasswordField.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         // 
         // FormEncryptionTask
