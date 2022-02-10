@@ -1,5 +1,7 @@
 # Encryption Tool
 
+ <img src="gui.png">
+
 ## Description
 
 This tool provides a portable, lightweight, and bloatware free interface for easy encryption and decryption of sensitive data on the Windows platform.
@@ -10,7 +12,7 @@ This tool provides a portable, lightweight, and bloatware free interface for eas
 * Random password salting and PBKDF2 key derivation to generate unique permutations for every encryption.
 * Hash based verification for each and every write operation to ensure data can always be recovered.
 * Secure memory release of sensitive information to reduce the risk of recovery from memory dumps.
-* Secure erasure of original files to prevent recovery. 
+* Secure erasure of original files to prevent recovery.
 
 ## Usage (CLI application)
 
