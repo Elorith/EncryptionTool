@@ -57,7 +57,7 @@ public abstract class EncryptionTool
             return;
         }
         
-        this.EncryptPathRecursive(path, personalKey, rootParent);
+        this.EncryptPathRecursive(path, personalKey, rootParent, true);
     }
     
     public void DoFileDecryption(string path)
@@ -69,7 +69,7 @@ public abstract class EncryptionTool
 
         string personalKey = this.AskUserForPersonalKeyForDecryption(path);
         
-        this.DecryptFile(path, personalKey);
+        this.DecryptFile(path, personalKey, true);
     }
     
     public void DoDirectoryDecryption(string path)
@@ -86,7 +86,7 @@ public abstract class EncryptionTool
         
         string personalKey = this.AskUserForPersonalKeyForDecryption(path);
 
-        this.DecryptPathRecursive(path, personalKey, rootParent);
+        this.DecryptPathRecursive(path, personalKey, rootParent, true);
     }
     
     public void DoSecureErase(string path, SanitisationAlgorithmType sanitisationType, bool askForConfirmation = true)
@@ -104,7 +104,7 @@ public abstract class EncryptionTool
         eraser.ErasePath(path, sanitisationType);
     }
 
-    private void EncryptPathRecursive(string path, string personalKey, DirectoryInfo parent, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
+    private void EncryptPathRecursive(string path, string personalKey, DirectoryInfo parent, bool releasePersonalKey = true, SanitisationAlgorithmType sanitisationType = SanitisationAlgorithmType.DoDSensitive)
     {
         if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
         {
@@ -117,10 +117,10 @@ public abstract class EncryptionTool
 
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                this.EncryptPathRecursive(subPath, personalKey, outputDirectory, sanitisationType);
+                this.EncryptPathRecursive(subPath, personalKey, outputDirectory, false, sanitisationType);
             }
             
-            MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length, true);
+            MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length, releasePersonalKey);
 
             Directory.Delete(path);
         }
@@ -133,7 +133,7 @@ public abstract class EncryptionTool
         }
     }
 
-    private void DecryptPathRecursive(string path, string personalKey, DirectoryInfo parent)
+    private void DecryptPathRecursive(string path, string personalKey, DirectoryInfo parent, bool releasePersonalKey = true)
     {
         if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
         {
@@ -151,10 +151,10 @@ public abstract class EncryptionTool
             
             foreach (string subPath in Directory.GetFileSystemEntries(path))
             {
-                this.DecryptPathRecursive(subPath, personalKey, outputDirectory);
+                this.DecryptPathRecursive(subPath, personalKey, outputDirectory, false);
             }
             
-            MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length, true);
+            MemoryManagement.HandleSensitiveResource(personalKey, personalKey.Length, releasePersonalKey);
 
             Directory.Delete(path);
         }
