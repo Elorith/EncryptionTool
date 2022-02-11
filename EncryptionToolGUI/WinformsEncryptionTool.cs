@@ -90,7 +90,7 @@ public class WinformsEncryptionTool : EncryptionTool
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error! " + ex.Message);
+                MessageBox.Show("Error! " + ex.Message + ".");
             }
         }
 
@@ -115,7 +115,7 @@ public class WinformsEncryptionTool : EncryptionTool
 
     protected override void UserEnteredNonMatchingPasswords()
     {
-        MessageBox.Show("Entered passwords did not match!");
+        throw new Exception("Entered passwords did not match");
     }
 
     protected override void EncryptionVerificationProcessSuccess()
