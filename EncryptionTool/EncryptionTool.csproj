@@ -44,6 +44,7 @@
         <Compile Include="CryptographyProvider.cs" />
         <Compile Include="EncryptionTool.cs" />
         <Compile Include="ILogger.cs" />
+        <Compile Include="MediaExtensions.cs" />
         <Compile Include="MemoryManagement.cs" />
         <Compile Include="SanitisationAlgorithmType.cs" />
         <Compile Include="Logger.cs" />
