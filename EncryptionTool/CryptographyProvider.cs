@@ -64,7 +64,6 @@ public class CryptographyProvider
                {
                     mediaHeader = "test";    
                }
-               
                this.EncryptHeaderToStream(originalDirectoryName, writeMediaHeader, mediaHeader, output, personalKey);
           }
           
@@ -81,10 +80,8 @@ public class CryptographyProvider
                bool readMediaHeader;
                string mediaHeader;
                string originalDirectoryName = this.DecryptHeaderFromStream(input, personalKey, out readMediaHeader, out mediaHeader);
-
-               if (readMediaHeader && mediaHeader == "test")
+               if (readMediaHeader)
                {
-                    Logger.Singleton.WriteLine("!");
                }
 
                outputPath = Path.Combine(parent.FullName, originalDirectoryName);
@@ -130,10 +127,8 @@ public class CryptographyProvider
                bool readMediaHeader;
                string mediaHeader;
                string originalFileName = this.DecryptHeaderFromStream(input, personalKey, out readMediaHeader, out mediaHeader);
-               
-               if (readMediaHeader && mediaHeader == "test")
+               if (readMediaHeader)
                {
-                    Logger.Singleton.WriteLine("!");
                }
                
                outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
@@ -169,10 +164,8 @@ public class CryptographyProvider
                bool readMediaHeader;
                string mediaHeader;
                string originalFileName = this.DecryptHeaderFromStream(input, personalKey, out readMediaHeader, out mediaHeader);
-               
-               if (readMediaHeader && mediaHeader == "test")
+               if (readMediaHeader)
                {
-                    Logger.Singleton.WriteLine("!");
                }
 
                using (MemoryStream output = new MemoryStream())
