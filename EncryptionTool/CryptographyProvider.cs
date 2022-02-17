@@ -58,7 +58,14 @@ public class CryptographyProvider
           using (FileStream output = new FileStream(headerOutputPath, FileMode.Create))
           {
                string originalDirectoryName = currentDirectory.Name;
-               this.EncryptHeaderToStream(originalDirectoryName, output, personalKey);
+               bool writeMediaHeader = MediaExtensions.IsFileOrFolderVideo(originalDirectoryName);
+               string mediaHeader = null;
+               if (writeMediaHeader)
+               {
+                    mediaHeader = "test";    
+               }
+               
+               this.EncryptHeaderToStream(originalDirectoryName, writeMediaHeader, mediaHeader, output, personalKey);
           }
           
           File.SetAttributes(headerOutputPath, File.GetAttributes(headerOutputPath) | FileAttributes.Hidden);
@@ -71,7 +78,10 @@ public class CryptographyProvider
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string originalDirectoryName = this.DecryptHeaderFromStream(input, personalKey);
+               string originalDirectoryName;
+               bool writeMediaHeader;
+               string mediaHeader;
+               this.DecryptHeaderFromStream(input, personalKey, out originalDirectoryName, out writeMediaHeader, out mediaHeader);
 
                outputPath = Path.Combine(parent.FullName, originalDirectoryName);
                Directory.CreateDirectory(outputPath);
@@ -92,7 +102,14 @@ public class CryptographyProvider
           {
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    this.EncryptHeaderToStream(path, output, personalKey);
+                    string originalFileName = Path.GetFileName(path);
+                    bool writeMediaHeader = MediaExtensions.IsFileOrFolderVideo(originalFileName);
+                    string mediaHeader = null;
+                    if (writeMediaHeader)
+                    {
+                          mediaHeader = "test";    
+                    }
+                    this.EncryptHeaderToStream(originalFileName, writeMediaHeader, mediaHeader, output, personalKey);
                     
                     this.EncryptBodyToStream(input, output, personalKey);
                }
@@ -106,7 +123,10 @@ public class CryptographyProvider
           string outputPath;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
-               string originalFileName = this.DecryptHeaderFromStream(input, personalKey);
+               string originalFileName;
+               bool writeMediaHeader;
+               string mediaHeader;
+               this.DecryptHeaderFromStream(input, personalKey, out originalFileName, out writeMediaHeader, out mediaHeader);
 
                outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
@@ -233,12 +253,21 @@ public class CryptographyProvider
           return original;
      }
 
-     private void EncryptHeaderToStream(string path, Stream output, string personalKey)
+     private void EncryptHeaderToStream(string fileOrFolderName, bool writeMediaHeader, string mediaHeader, Stream output, string personalKey)
      {
-          string originalFileName = Path.GetFileName(path);
-
           StringBuilder header = new StringBuilder();
-          header.Append(originalFileName);
+          header.Append(fileOrFolderName);
+          header.Append('|');
+          if (writeMediaHeader)
+          {
+               header.Append("t");
+          }
+          else
+          {
+               header.Append("f");
+          }
+          header.Append('|');
+          header.Append(mediaHeader);
 
           byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header.ToString(), personalKey);
           byte[] headerLengthBytes = BitConverter.GetBytes(headerBytes.Length);
@@ -247,7 +276,7 @@ public class CryptographyProvider
           output.Write(headerBytes, 0, headerBytes.Length);
      }
 
-     private string DecryptHeaderFromStream(Stream input, string personalKey)
+     private void DecryptHeaderFromStream(Stream input, string personalKey, out string fileOrFolderName, out bool writeMediaHeader, out string mediaHeader)
      {
           byte[] headerLengthBytes = new byte[4];
           input.Read(headerLengthBytes, 0, 4);
@@ -256,7 +285,29 @@ public class CryptographyProvider
           input.Read(headerBytes, 0, headerBytes.Length);
           
           string header = this.DecryptStringFromBufferWithPersonalKey(headerBytes, personalKey);
-          return header;
+          string[] split = header.Split('|');
+          
+          fileOrFolderName = split[0];
+          if (split[1] == "t")
+          {
+               writeMediaHeader = true;
+          }
+          else if (split[1] == "f")
+          {
+               writeMediaHeader = false;
+          }
+          else
+          {
+               throw new FormatException("writeMediaHeader boolean could not be read");
+          }
+          if (writeMediaHeader)
+          {
+               mediaHeader = split[2];    
+          }
+          else
+          {
+               mediaHeader = null;
+          }
      }
 
      private void EncryptBodyToStream(Stream input, Stream output, string personalKey)

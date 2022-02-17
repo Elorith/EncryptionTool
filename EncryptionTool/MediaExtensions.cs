@@ -7,7 +7,7 @@ public static class MediaExtensions
         ".mp4", ".mov"
     };
 
-    public static bool IsFileVideo(string path)
+    public static bool IsFileOrFolderVideo(string path)
     {
         foreach (string extension in MediaExtensions.videoExtensionsList)
         {
