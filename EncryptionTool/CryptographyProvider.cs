@@ -11,7 +11,7 @@ public class CryptographyProvider
      public const int EncryptionKeySize = 256;
      public const int EncryptionBlockSize = 128;
      private const ulong encryptionBufferSize = 1048576;
-     
+
      public const int Pbkdf2Iterations = 10000;
 
      #region Public API Functions
@@ -92,8 +92,7 @@ public class CryptographyProvider
           {
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
-                    string originalFileName = Path.GetFileName(path);
-                    this.EncryptHeaderToStream(originalFileName, output, personalKey);
+                    this.EncryptHeaderToStream(path, output, personalKey);
                     
                     this.EncryptBodyToStream(input, output, personalKey);
                }
@@ -234,9 +233,14 @@ public class CryptographyProvider
           return original;
      }
 
-     private void EncryptHeaderToStream(string header, Stream output, string personalKey)
+     private void EncryptHeaderToStream(string path, Stream output, string personalKey)
      {
-          byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header, personalKey);
+          string originalFileName = Path.GetFileName(path);
+
+          StringBuilder header = new StringBuilder();
+          header.Append(originalFileName);
+
+          byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header.ToString(), personalKey);
           byte[] headerLengthBytes = BitConverter.GetBytes(headerBytes.Length);
 
           output.Write(headerLengthBytes, 0, 4);
@@ -251,7 +255,8 @@ public class CryptographyProvider
           byte[] headerBytes = new byte[BitConverter.ToInt32(headerLengthBytes, 0)];
           input.Read(headerBytes, 0, headerBytes.Length);
           
-          return this.DecryptStringFromBufferWithPersonalKey(headerBytes, personalKey);
+          string header = this.DecryptStringFromBufferWithPersonalKey(headerBytes, personalKey);
+          return header;
      }
 
      private void EncryptBodyToStream(Stream input, Stream output, string personalKey)
