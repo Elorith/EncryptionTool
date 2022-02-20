@@ -7,8 +7,13 @@ public static class MediaExtensions
         ".mp4", ".mov"
     };
 
-    public static bool IsFileOrFolderVideo(string path)
+    public static bool IsPathVideo(string path)
     {
+        if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
+        {
+            return false;
+        }
+
         foreach (string extension in MediaExtensions.videoExtensionsList)
         {
             if (Path.HasExtension(extension))
@@ -18,5 +23,10 @@ public static class MediaExtensions
         }
 
         return false;
+    }
+
+    public static string GetMediaPreview(string path)
+    {
+        return "test";
     }
 }
