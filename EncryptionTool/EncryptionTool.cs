@@ -178,11 +178,11 @@ public abstract class EncryptionTool
         {
             byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
 
-            string hash = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
+            string checksum = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
 
             MemoryManagement.HandleSensitiveResource(decrypted, decrypted.Length, true);
 
-            if (hash != Path.GetFileNameWithoutExtension(outputPath))
+            if (checksum != Path.GetFileNameWithoutExtension(outputPath))
             {
                 throw new CryptographicException("Encryption verification process failed");
             }
