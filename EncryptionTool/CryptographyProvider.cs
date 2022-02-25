@@ -15,37 +15,7 @@ public class CryptographyProvider
      public const int Pbkdf2Iterations = 10000;
 
      #region Public API Functions
-     
-     public string EncryptStringWithPersonalKey(string original, string personalKey)
-     {
-          byte[] buffer = this.EncryptStringToBufferWithPersonalKey(original, personalKey);
-          string encrypted = this.BufferToHexadecimal(buffer);
 
-          return encrypted;
-     }
-     
-     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
-     {
-          byte[] buffer = this.HexadecimalToBuffer(encrypted);
-          string original = this.DecryptStringFromBufferWithPersonalKey(buffer, personalKey);
-
-          return original;
-     }
-     
-     public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
-     {
-          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
-
-          return encrypted;
-     }
-
-     public string DecryptStringFromBufferWithPersonalKey(byte[] encrypted, string personalKey)
-     {
-          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
-
-          return original;
-     }
-     
      public string EncryptDirectoryRootToDiskWithPersonalKey(string path, string personalKey, DirectoryInfo parent)
      {
           DirectoryInfo currentDirectory = new DirectoryInfo(path);
@@ -94,14 +64,14 @@ public class CryptographyProvider
      {
           string encryptedFileName = this.HashFileToString(path, HashAlgorithmType.Md5) + ".aes";
           string directoryName = Path.GetDirectoryName(path);
-          
+
           string outputPath = Path.Combine(directoryName, encryptedFileName);
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
                     string originalFileName = Path.GetFileName(path);
-                    bool writeMediaHeader = MediaExtensions.IsPathVideo(originalFileName);
+                    bool writeMediaHeader = MediaExtensions.IsFileVideo(originalFileName);
                     string mediaHeader = null;
                     if (writeMediaHeader)
                     {
@@ -112,7 +82,7 @@ public class CryptographyProvider
                     this.EncryptBodyToStream(input, output, personalKey);
                }
           }
-          
+
           return outputPath;
      }
 
@@ -170,6 +140,36 @@ public class CryptographyProvider
           }
 
           return buffer;
+     }
+     
+     public string EncryptStringWithPersonalKey(string original, string personalKey)
+     {
+          byte[] buffer = this.EncryptStringToBufferWithPersonalKey(original, personalKey);
+          string encrypted = this.BufferToHexadecimal(buffer);
+
+          return encrypted;
+     }
+     
+     public string DecryptStringWithPersonalKey(string encrypted, string personalKey)
+     {
+          byte[] buffer = this.HexadecimalToBuffer(encrypted);
+          string original = this.DecryptStringFromBufferWithPersonalKey(buffer, personalKey);
+
+          return original;
+     }
+     
+     public byte[] EncryptStringToBufferWithPersonalKey(string original, string personalKey)
+     {
+          byte[] encrypted = this.EncryptBufferWithPersonalKey(Encoding.UTF8.GetBytes(original), personalKey);
+
+          return encrypted;
+     }
+
+     public string DecryptStringFromBufferWithPersonalKey(byte[] encrypted, string personalKey)
+     {
+          string original = Encoding.UTF8.GetString(this.DecryptBufferWithPersonalKey(encrypted, personalKey));
+
+          return original;
      }
 
      public string HashFileToString(string path, HashAlgorithmType algorithmType)
@@ -257,21 +257,22 @@ public class CryptographyProvider
 
      private void EncryptHeaderToStream(string fileOrFolderName, bool writeMediaHeader, string mediaHeader, Stream output, string personalKey)
      {
-          StringBuilder header = new StringBuilder();
-          header.Append(fileOrFolderName);
-          header.Append('|');
+          StringBuilder builder = new StringBuilder();
+          builder.Append(fileOrFolderName);
+          builder.Append('|');
           if (writeMediaHeader)
           {
-               header.Append('t');
-               header.Append('|');
-               header.Append(mediaHeader);
+               builder.Append('t');
+               builder.Append('|');
+               builder.Append(mediaHeader);
           }
           else
           {
-               header.Append('f');
+               builder.Append('f');
           }
+          string header = builder.ToString();
 
-          byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header.ToString(), personalKey);
+          byte[] headerBytes = this.EncryptStringToBufferWithPersonalKey(header, personalKey);
           byte[] headerLengthBytes = BitConverter.GetBytes(headerBytes.Length);
 
           output.Write(headerLengthBytes, 0, 4);
