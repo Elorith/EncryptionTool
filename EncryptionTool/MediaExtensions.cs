@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Net.Mime;
 using System.Text;
 
 public static class MediaExtensions
@@ -71,6 +70,8 @@ public static class MediaExtensions
             image.Save(stream, ImageFormat.Jpeg);
             bytes = stream.ToArray();
         }
+        
+        File.Delete(MediaExtensions.ffmpegPathTempOutputFile);
         
         return bytes;
     }
