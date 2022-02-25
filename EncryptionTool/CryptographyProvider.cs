@@ -75,7 +75,7 @@ public class CryptographyProvider
                     string mediaHeader = null;
                     if (writeMediaHeader)
                     {
-                         mediaHeader = MediaExtensions.GetMediaPreview(originalFileName);  
+                         mediaHeader = MediaExtensions.GetMediaPreview(path);  
                     }
                     this.EncryptHeaderToStream(originalFileName, writeMediaHeader, mediaHeader, output, personalKey);
                     
