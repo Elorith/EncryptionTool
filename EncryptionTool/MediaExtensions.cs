@@ -2,21 +2,20 @@ using System.IO;
 
 public static class MediaExtensions
 {
+    private const double mediaPreviewImagePosition = 0.0;
+    
     private static readonly string[] videoExtensionsList =
     {
-        ".mp4", ".mov"
+        "mp4", "mov"
     };
 
-    public static bool IsPathVideo(string path)
+    public static bool IsFileVideo(string path)
     {
-        if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
-        {
-            return false;
-        }
-
+        string[] split = path.Split('.');
+        
         foreach (string extension in MediaExtensions.videoExtensionsList)
         {
-            if (Path.HasExtension(extension))
+            if (extension == split[split.Length - 1])
             {
                 return true;
             }
@@ -27,6 +26,13 @@ public static class MediaExtensions
 
     public static string GetMediaPreview(string path)
     {
-        return "test";
+        byte[] image = MediaExtensions.CreatePreviewImage(path, MediaExtensions.mediaPreviewImagePosition);
+
+        return "";
+    }
+
+    private static byte[] CreatePreviewImage(string path, double position)
+    {
+        return null;
     }
 }
