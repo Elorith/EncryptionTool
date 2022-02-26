@@ -89,19 +89,22 @@ public static class MediaExtensions
             process2.Start();
             process2.WaitForExit();
         }
+
+        string tempOutputPath = Path.Combine(Environment.CurrentDirectory, "tempThumb.jpg");
         
         byte[] bytes = null;
         using (MemoryStream stream = new MemoryStream())
         {
-            using (Image image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "tempThumb.jpg")))
+            using (Image image = Image.FromFile(tempOutputPath))
             {
                 image.Save(stream, ImageFormat.Jpeg);
                 bytes = stream.ToArray();
             }
         }
         
-        File.Delete(Path.Combine(Environment.CurrentDirectory, "tempThumb.jpg"));
-        
+        SecureEraser eraser = new SecureEraser();
+        eraser.ErasePath(tempOutputPath, SanitisationAlgorithmType.DoDSensitive);
+
         return bytes;
     }
 }
