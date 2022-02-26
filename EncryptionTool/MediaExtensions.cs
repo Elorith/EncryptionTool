@@ -50,17 +50,7 @@ public static class MediaExtensions
         int lengthInMilliseconds = 0;
         using (Process process1 = new Process())
         {
-            ProcessStartInfo info1 = new ProcessStartInfo
-            {
-                FileName = Path.Combine(Environment.CurrentDirectory, MediaExtensions.ffprobeFileName),
-                Arguments = "-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " + path/*+ " -sexagesimal"*/,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                WorkingDirectory = Environment.CurrentDirectory
-            };
-
-            process1.StartInfo = info1;
+            process1.StartInfo = MediaExtensions.GetProcessStartInfo(Path.Combine(Environment.CurrentDirectory, MediaExtensions.ffprobeFileName), "-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " + path);
 
             process1.Start();
             process1.WaitForExit();
@@ -75,16 +65,7 @@ public static class MediaExtensions
         
         using (Process process2 = new Process())
         {
-            ProcessStartInfo info2 = new ProcessStartInfo
-            {
-                FileName = Path.Combine(Environment.CurrentDirectory, MediaExtensions.ffmpegFileName),
-                Arguments = "-i " + path + " -ss " + seek + " -vframes 1 tempThumb.jpg",
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                WorkingDirectory = Environment.CurrentDirectory
-            };
-
-            process2.StartInfo = info2;
+            process2.StartInfo = MediaExtensions.GetProcessStartInfo(Path.Combine(Environment.CurrentDirectory, MediaExtensions.ffmpegFileName), "-i " + path + " -ss " + seek + " -vframes 1 tempThumb.jpg");
 
             process2.Start();
             process2.WaitForExit();
@@ -106,5 +87,20 @@ public static class MediaExtensions
         eraser.ErasePath(tempOutputPath, SanitisationAlgorithmType.DoDSensitive);
 
         return bytes;
+    }
+
+    private static ProcessStartInfo GetProcessStartInfo(string processPath, string arguments)
+    {
+        ProcessStartInfo info = new ProcessStartInfo
+        {
+            FileName = processPath,
+            Arguments = arguments,
+            CreateNoWindow = true,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            WorkingDirectory = Environment.CurrentDirectory
+        };
+
+        return info;
     }
 }
