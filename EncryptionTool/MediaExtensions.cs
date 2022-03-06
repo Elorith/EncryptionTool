@@ -31,17 +31,18 @@ public static class MediaExtensions
         return false;
     }
     
-    public static Image LoadMediaPreview(string image)
+    public static MediaPreview LoadMediaPreview(string image)
     {
         byte[] bytes = Utilities.HexadecimalToBuffer(image);
 
-        Image media;
-        using (MemoryStream stream = new MemoryStream(bytes))
+        Stream stream = new MemoryStream(bytes);
+        MediaPreview preview = new MediaPreview
         {
-            media = Image.FromStream(stream);
-        }
+            Thumbnail = Image.FromStream(stream),
+            UnderlyingStream = stream
+        };
 
-        return media;
+        return preview;
     }
 
     public static string GetMediaPreview(string path)
@@ -75,16 +76,17 @@ public static class MediaExtensions
         TimeSpan timespan = TimeSpan.FromMilliseconds(positionInMilliseconds);
 
         string seek = timespan.Hours.ToString("00") + ":" + timespan.Minutes.ToString("00") + ":" + timespan.Seconds.ToString("00") + "." + timespan.Milliseconds.ToString("000");
+
+        string tempFileName = "ThumbTemp.jpg";
+        string tempOutputPath = Path.Combine(Environment.CurrentDirectory, tempFileName);
         
         using (Process process2 = new Process())
         {
-            process2.StartInfo = MediaExtensions.GetProcessStartInfo(Path.Combine(Environment.CurrentDirectory, MediaExtensions.ffmpegFileName), "-i " + path + " -ss " + seek + " -vframes 1 tempThumb.jpg");
+            process2.StartInfo = MediaExtensions.GetProcessStartInfo(Path.Combine(Environment.CurrentDirectory, MediaExtensions.ffmpegFileName), "-i " + path + " -ss " + seek + " -vframes 1 " + tempFileName);
 
             process2.Start();
             process2.WaitForExit();
         }
-
-        string tempOutputPath = Path.Combine(Environment.CurrentDirectory, "tempThumb.jpg");
         
         byte[] bytes = null;
         using (MemoryStream stream = new MemoryStream())
@@ -115,5 +117,17 @@ public static class MediaExtensions
         };
 
         return info;
+    }
+    
+    public class MediaPreview
+    {
+        public Image Thumbnail;
+        public Stream UnderlyingStream;
+
+        public void Dispose()
+        {
+            this.Thumbnail.Dispose();
+            this.UnderlyingStream.Dispose();
+        }
     }
 }

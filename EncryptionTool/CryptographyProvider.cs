@@ -121,7 +121,7 @@ public class CryptographyProvider
           return buffer;
      }
 
-     public byte[] DecryptFileToMemoryWithPersonalKey(string path, string personalKey, out Image thumbnail)
+     public byte[] DecryptFileToMemoryWithPersonalKey(string path, string personalKey, out MediaExtensions.MediaPreview preview)
      {
           byte[] buffer;
           using (FileStream input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -131,11 +131,11 @@ public class CryptographyProvider
                string originalFileName = this.DecryptHeaderFromStream(input, personalKey, out readMediaHeader, out mediaHeader);
                if (readMediaHeader)
                {
-                    thumbnail = MediaExtensions.LoadMediaPreview(mediaHeader);
+                    preview = MediaExtensions.LoadMediaPreview(mediaHeader);
                }
                else
                {
-                    thumbnail = null;
+                    preview = null;
                }
 
                using (MemoryStream output = new MemoryStream())
