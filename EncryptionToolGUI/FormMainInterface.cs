@@ -106,7 +106,7 @@ public partial class FormMainInterface : Form
             this.checkboxChangedFlag = true;
             this.CheckBoxEncryptFiles.Checked = false;
             this.checkboxChangedFlag = false;
-
+            this.ClearSelectedPath();
         }
         else if (!checkboxChangedFlag)
         {

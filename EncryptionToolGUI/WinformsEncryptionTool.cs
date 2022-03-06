@@ -29,8 +29,10 @@ public class WinformsEncryptionTool : EncryptionTool
     {
         if (File.Exists(path) || Directory.Exists(path))
         {
+#if !DEBUG
             try
             {
+#endif
                 if (this.formMainInterface.IsEncryptionModeFiles())
                 {
                     this.DoFileEncryption(path);
@@ -44,11 +46,13 @@ public class WinformsEncryptionTool : EncryptionTool
                     throw new Exception("Neither encryption mode is selected");
                 }
                 MessageBox.Show("Successfully encrypted the specified path.");
+#if !DEBUG
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error! " + ex.Message);
+                MessageBox.Show("Error! " + ex.Message + ".");
             }
+#endif
         }
 
         this.formEncryptionTask.Close();
@@ -72,8 +76,10 @@ public class WinformsEncryptionTool : EncryptionTool
     {
         if (File.Exists(path) || Directory.Exists(path))
         {
+#if !DEBUG
             try
             {
+#endif
                 if (this.formMainInterface.IsEncryptionModeFiles())
                 {
                     this.DoFileDecryption(path);
@@ -87,11 +93,13 @@ public class WinformsEncryptionTool : EncryptionTool
                     throw new Exception("Neither encryption mode is selected");
                 }
                 MessageBox.Show("Successfully decrypted the specified path.");
+#if !DEBUG
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error! " + ex.Message + ".");
             }
+#endif
         }
 
         this.formDecryptionTask.Close();
