@@ -1,4 +1,6 @@
 using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Security.Authentication;
 using System.Security.Cryptography;
@@ -176,7 +178,10 @@ public abstract class EncryptionTool
         
         try
         {
-            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
+            Image thumbnail;
+            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey, out thumbnail);
+            
+            thumbnail.Save("Test.jpeg", ImageFormat.Jpeg);
 
             string checksum = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
 
