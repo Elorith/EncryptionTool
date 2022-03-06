@@ -31,6 +31,19 @@ public static class MediaExtensions
 
         return false;
     }
+    
+    public static Image LoadMediaPreview(string image)
+    {
+        byte[] bytes = Utilities.HexadecimalToBuffer(image);
+
+        Image media;
+        using (MemoryStream stream = new MemoryStream(bytes))
+        {
+            media = Image.FromStream(stream);
+        }
+
+        return media;
+    }
 
     public static string GetMediaPreview(string path)
     {
@@ -40,8 +53,8 @@ public static class MediaExtensions
             throw new FormatException("Failed to get media preview image");
         }
         
-        string image = Encoding.UTF8.GetString(bytes);
-        
+        string image = Utilities.BufferToHexadecimal(bytes);
+
         return image;
     }
 
