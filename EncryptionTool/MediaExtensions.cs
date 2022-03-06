@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Text;
 
 public static class MediaExtensions
 {
@@ -14,7 +13,7 @@ public static class MediaExtensions
 
     private static readonly string[] videoExtensionsList =
     {
-        "mp4", "mov"
+        "mp4", "mov", "wmv"
     };
 
     public static bool IsFileVideo(string path)
