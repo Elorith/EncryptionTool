@@ -54,8 +54,9 @@ public static class MediaExtensions
 
             process1.Start();
             process1.WaitForExit();
-            
-            lengthInMilliseconds = (int)(Convert.ToDouble(process1.StandardOutput.ReadToEnd()) * 1000);
+
+            string stdout = process1.StandardOutput.ReadToEnd();
+            lengthInMilliseconds = (int)(Convert.ToDouble(stdout) * 1000);
         }
         
         double positionInMilliseconds = lengthInMilliseconds * position;
