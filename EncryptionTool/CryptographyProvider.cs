@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.IO;
 using System.Security.Authentication;
 using System.Security.Cryptography;
@@ -94,10 +95,7 @@ public class CryptographyProvider
                bool readMediaHeader;
                string mediaHeader;
                string originalFileName = this.DecryptHeaderFromStream(input, personalKey, out readMediaHeader, out mediaHeader);
-               if (readMediaHeader)
-               {
-               }
-               
+
                outputPath = Path.Combine(Path.GetDirectoryName(path), originalFileName);
                using (FileStream output = new FileStream(outputPath, FileMode.Create))
                {
