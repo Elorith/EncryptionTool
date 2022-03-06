@@ -294,9 +294,9 @@ public class CryptographyProvider
 
           byte[] headerBytes = new byte[BitConverter.ToInt32(headerLengthBytes, 0)];
           input.Read(headerBytes, 0, headerBytes.Length);
-          
+
           string header = this.DecryptStringFromBufferWithPersonalKey(headerBytes, personalKey);
-          string[] split = header.Split('|');
+          string[] split = header.Split(new []{'|', '|', '|'}, 3, StringSplitOptions.None);
           
           string fileOrFolderName = split[0];
           if (split[1] == "t")
