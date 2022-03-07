@@ -35,12 +35,14 @@
         this.DialogSelectPathDirectory = new System.Windows.Forms.FolderBrowserDialog();
         this.ButtonEncrypt = new System.Windows.Forms.Button();
         this.ButtonDecrypt = new System.Windows.Forms.Button();
-        this.TextBoxSelectedPath = new System.Windows.Forms.TextBox();
+        this.TextBoxExplorerPath = new System.Windows.Forms.TextBox();
+        this.ButtonSelectedPathForward = new System.Windows.Forms.Button();
+        this.ButtonSelectedPathBack = new System.Windows.Forms.Button();
         this.SuspendLayout();
         // 
         // ButtonSelectPath
         // 
-        this.ButtonSelectPath.Location = new System.Drawing.Point(546, 15);
+        this.ButtonSelectPath.Location = new System.Drawing.Point(800, 15);
         this.ButtonSelectPath.Name = "ButtonSelectPath";
         this.ButtonSelectPath.Size = new System.Drawing.Size(61, 22);
         this.ButtonSelectPath.TabIndex = 1;
@@ -72,7 +74,7 @@
         // 
         // ButtonEncrypt
         // 
-        this.ButtonEncrypt.Location = new System.Drawing.Point(14, 91);
+        this.ButtonEncrypt.Location = new System.Drawing.Point(14, 510);
         this.ButtonEncrypt.Name = "ButtonEncrypt";
         this.ButtonEncrypt.Size = new System.Drawing.Size(138, 34);
         this.ButtonEncrypt.TabIndex = 4;
@@ -82,7 +84,7 @@
         // 
         // ButtonDecrypt
         // 
-        this.ButtonDecrypt.Location = new System.Drawing.Point(167, 91);
+        this.ButtonDecrypt.Location = new System.Drawing.Point(167, 510);
         this.ButtonDecrypt.Name = "ButtonDecrypt";
         this.ButtonDecrypt.Size = new System.Drawing.Size(138, 34);
         this.ButtonDecrypt.TabIndex = 5;
@@ -90,21 +92,43 @@
         this.ButtonDecrypt.UseVisualStyleBackColor = true;
         this.ButtonDecrypt.Click += new System.EventHandler(this.ButtonDecrypt_Click);
         // 
-        // TextBoxSelectedPath
+        // TextBoxExplorerPath
         // 
-        this.TextBoxSelectedPath.AcceptsTab = true;
-        this.TextBoxSelectedPath.Location = new System.Drawing.Point(14, 15);
-        this.TextBoxSelectedPath.Name = "TextBoxSelectedPath";
-        this.TextBoxSelectedPath.Size = new System.Drawing.Size(527, 20);
-        this.TextBoxSelectedPath.TabIndex = 6;
+        this.TextBoxExplorerPath.AcceptsTab = true;
+        this.TextBoxExplorerPath.Location = new System.Drawing.Point(92, 15);
+        this.TextBoxExplorerPath.Name = "TextBoxExplorerPath";
+        this.TextBoxExplorerPath.Size = new System.Drawing.Size(700, 20);
+        this.TextBoxExplorerPath.TabIndex = 6;
+        // 
+        // ButtonSelectedPathForward
+        // 
+        this.ButtonSelectedPathForward.Location = new System.Drawing.Point(50, 15);
+        this.ButtonSelectedPathForward.Name = "ButtonSelectedPathForward";
+        this.ButtonSelectedPathForward.Size = new System.Drawing.Size(35, 22);
+        this.ButtonSelectedPathForward.TabIndex = 7;
+        this.ButtonSelectedPathForward.Text = ">";
+        this.ButtonSelectedPathForward.UseVisualStyleBackColor = true;
+        this.ButtonSelectedPathForward.Click += new System.EventHandler(this.ButtonSelectedPathForward_Click);
+        // 
+        // ButtonSelectedPathBack
+        // 
+        this.ButtonSelectedPathBack.Location = new System.Drawing.Point(14, 15);
+        this.ButtonSelectedPathBack.Name = "ButtonSelectedPathBack";
+        this.ButtonSelectedPathBack.Size = new System.Drawing.Size(35, 22);
+        this.ButtonSelectedPathBack.TabIndex = 8;
+        this.ButtonSelectedPathBack.Text = "<";
+        this.ButtonSelectedPathBack.UseVisualStyleBackColor = true;
+        this.ButtonSelectedPathBack.Click += new System.EventHandler(this.ButtonSelectedPathBack_Click);
         // 
         // FormMainInterface
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.BackColor = System.Drawing.SystemColors.Control;
-        this.ClientSize = new System.Drawing.Size(616, 137);
-        this.Controls.Add(this.TextBoxSelectedPath);
+        this.ClientSize = new System.Drawing.Size(875, 556);
+        this.Controls.Add(this.ButtonSelectedPathBack);
+        this.Controls.Add(this.ButtonSelectedPathForward);
+        this.Controls.Add(this.TextBoxExplorerPath);
         this.Controls.Add(this.ButtonDecrypt);
         this.Controls.Add(this.ButtonEncrypt);
         this.Controls.Add(this.CheckBoxEncryptDirectories);
@@ -119,7 +143,11 @@
         this.PerformLayout();
     }
 
-    private System.Windows.Forms.TextBox TextBoxSelectedPath;
+    private System.Windows.Forms.Button ButtonSelectedPathBack;
+
+    private System.Windows.Forms.Button ButtonSelectedPathForward;
+
+    private System.Windows.Forms.TextBox TextBoxExplorerPath;
 
     private System.Windows.Forms.Button ButtonDecrypt;
 

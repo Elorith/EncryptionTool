@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
@@ -9,12 +10,48 @@ public partial class FormMainInterface : Form
     
     public event OnBeginEncryptCallback OnBeginEncrypt;
     public event OnBeginDecryptCallback OnBeginDecrypt;
-    
+
+    private Stack<string> pathsToNavigateBackTo = new Stack<string>();
+    private Stack<string> pathsToNavigateForwardTo = new Stack<string>();
     private bool checkboxChangedFlag = false;
 
     public FormMainInterface()
     {
         this.InitializeComponent();
+    }
+
+    public string SelectedPath
+    {
+        get
+        {
+            return this.TextBoxExplorerPath.Text;
+        }
+
+        set
+        {
+            if (this.TextBoxExplorerPath.Text == value)
+            {
+                return;
+            }
+            
+            if (this.pathsToNavigateBackTo.Count > 0 && this.pathsToNavigateBackTo.Peek() == value)
+            {
+                this.pathsToNavigateBackTo.Pop();
+                
+                this.pathsToNavigateForwardTo.Push(this.TextBoxExplorerPath.Text);
+            }
+            else
+            {
+                this.pathsToNavigateBackTo.Push(this.TextBoxExplorerPath.Text);
+            }
+
+            if (this.pathsToNavigateForwardTo.Count > 0 && this.pathsToNavigateForwardTo.Peek() == value)
+            {
+                this.pathsToNavigateForwardTo.Pop();
+            }
+
+            this.TextBoxExplorerPath.Text = value;
+        }
     }
 
     public bool IsEncryptionModeFiles()
@@ -73,16 +110,19 @@ public partial class FormMainInterface : Form
 
         this.OnBeginDecrypt(path);
     }
-
+    
     public void ClearSelectedPath()
     {
-        this.TextBoxSelectedPath.Text = "";
+        this.SelectedPath = string.Empty;
+        
+        this.pathsToNavigateBackTo.Clear();
+        this.pathsToNavigateForwardTo.Clear();
     }
-
+    
     private void ButtonSelectPath_Click(object sender, EventArgs e)
     {
-        this.TextBoxSelectedPath.Text = this.Browse();
-    } 
+        this.SelectedPath = this.Browse();
+    }
 
     private void CheckBoxEncryptFiles_CheckedChanged(object sender, EventArgs e)
     {
@@ -116,11 +156,21 @@ public partial class FormMainInterface : Form
 
     private void ButtonEncrypt_Click(object sender, EventArgs e)
     {
-        this.Encrypt(this.TextBoxSelectedPath.Text);
+        this.Encrypt(this.SelectedPath);
     }
 
     private void ButtonDecrypt_Click(object sender, EventArgs e)
     {
-        this.Decrypt(this.TextBoxSelectedPath.Text);
+        this.Decrypt(this.SelectedPath);
+    }
+
+    private void ButtonSelectedPathBack_Click(object sender, EventArgs e)
+    {
+        this.SelectedPath = this.pathsToNavigateBackTo.Peek();
+    }
+
+    private void ButtonSelectedPathForward_Click(object sender, EventArgs e)
+    {
+        this.SelectedPath = this.pathsToNavigateForwardTo.Peek();
     }
 }
