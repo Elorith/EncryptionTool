@@ -102,6 +102,7 @@
         // 
         // ButtonSelectedPathForward
         // 
+        this.ButtonSelectedPathForward.Enabled = false;
         this.ButtonSelectedPathForward.Location = new System.Drawing.Point(50, 15);
         this.ButtonSelectedPathForward.Name = "ButtonSelectedPathForward";
         this.ButtonSelectedPathForward.Size = new System.Drawing.Size(35, 22);
@@ -112,6 +113,7 @@
         // 
         // ButtonSelectedPathBack
         // 
+        this.ButtonSelectedPathBack.Enabled = false;
         this.ButtonSelectedPathBack.Location = new System.Drawing.Point(14, 15);
         this.ButtonSelectedPathBack.Name = "ButtonSelectedPathBack";
         this.ButtonSelectedPathBack.Size = new System.Drawing.Size(35, 22);

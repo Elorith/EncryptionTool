@@ -50,6 +50,8 @@ public partial class FormMainInterface : Form
                 this.pathsToNavigateForwardTo.Pop();
             }
 
+            this.UpdatePathNavigationButtons();
+
             this.TextBoxExplorerPath.Text = value;
         }
     }
@@ -117,6 +119,28 @@ public partial class FormMainInterface : Form
         
         this.pathsToNavigateBackTo.Clear();
         this.pathsToNavigateForwardTo.Clear();
+        
+        this.UpdatePathNavigationButtons();
+    }
+
+    private void UpdatePathNavigationButtons()
+    {
+        if (this.pathsToNavigateBackTo.Count > 0)
+        {
+            this.ButtonSelectedPathBack.Enabled = true;
+        }
+        else
+        {
+            this.ButtonSelectedPathBack.Enabled = false;
+        }
+        if (this.pathsToNavigateForwardTo.Count > 0)
+        {
+            this.ButtonSelectedPathForward.Enabled = true;
+        }
+        else
+        {
+            this.ButtonSelectedPathForward.Enabled = false;
+        }
     }
     
     private void ButtonSelectPath_Click(object sender, EventArgs e)
