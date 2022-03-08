@@ -176,11 +176,7 @@ public abstract class EncryptionTool
         
         try
         {
-            MediaExtensions.MediaPreview preview;
-            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey, out preview);
-            
-            // preview.Thumbnail.Save("Test.jpeg", ImageFormat.Jpeg);
-            preview.Dispose();
+            byte[] decrypted = cryptography.DecryptFileToMemoryWithPersonalKey(outputPath, personalKey);
 
             string checksum = cryptography.HashBufferToString(decrypted, HashAlgorithmType.Md5, false);
 
