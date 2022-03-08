@@ -1,4 +1,4 @@
-partial class FormMainInterface
+﻿partial class FormMainInterface
 {
     /// <summary>
     /// Required designer variable.
