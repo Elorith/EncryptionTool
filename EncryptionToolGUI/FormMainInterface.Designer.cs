@@ -1,4 +1,4 @@
-﻿partial class FormMainInterface
+partial class FormMainInterface
 {
     /// <summary>
     /// Required designer variable.
@@ -38,6 +38,7 @@
         this.TextBoxExplorerPath = new System.Windows.Forms.TextBox();
         this.ButtonSelectedPathForward = new System.Windows.Forms.Button();
         this.ButtonSelectedPathBack = new System.Windows.Forms.Button();
+        this.ListView = new System.Windows.Forms.ListView();
         this.SuspendLayout();
         // 
         // ButtonSelectPath
@@ -95,7 +96,7 @@
         // TextBoxExplorerPath
         // 
         this.TextBoxExplorerPath.AcceptsTab = true;
-        this.TextBoxExplorerPath.Location = new System.Drawing.Point(92, 15);
+        this.TextBoxExplorerPath.Location = new System.Drawing.Point(92, 16);
         this.TextBoxExplorerPath.Name = "TextBoxExplorerPath";
         this.TextBoxExplorerPath.Size = new System.Drawing.Size(700, 20);
         this.TextBoxExplorerPath.TabIndex = 6;
@@ -122,12 +123,21 @@
         this.ButtonSelectedPathBack.UseVisualStyleBackColor = true;
         this.ButtonSelectedPathBack.Click += new System.EventHandler(this.ButtonSelectedPathBack_Click);
         // 
+        // ListView
+        // 
+        this.ListView.Location = new System.Drawing.Point(14, 83);
+        this.ListView.Name = "ListView";
+        this.ListView.Size = new System.Drawing.Size(846, 393);
+        this.ListView.TabIndex = 9;
+        this.ListView.UseCompatibleStateImageBehavior = false;
+        // 
         // FormMainInterface
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.BackColor = System.Drawing.SystemColors.Control;
         this.ClientSize = new System.Drawing.Size(875, 556);
+        this.Controls.Add(this.ListView);
         this.Controls.Add(this.ButtonSelectedPathBack);
         this.Controls.Add(this.ButtonSelectedPathForward);
         this.Controls.Add(this.TextBoxExplorerPath);
@@ -144,6 +154,8 @@
         this.ResumeLayout(false);
         this.PerformLayout();
     }
+
+    private System.Windows.Forms.ListView ListView;
 
     private System.Windows.Forms.Button ButtonSelectedPathBack;
 
